@@ -24,6 +24,10 @@ from .queries import weekly_saving_data_query
 def index(request):
     return HttpResponse("Hello From Django")
 
+class TawalaView(View):
+    def get(self,request):
+        return render(request,"spent/tawala_hotspot.html")
+
 class WeeklyBudgetSavingsView(LoginRequiredMixin,View):
     def get(self,request):
         user = User.objects.get(username=self.request.user)

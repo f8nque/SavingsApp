@@ -29,6 +29,7 @@ urlpatterns = [
     path('allocate/',include('distributer.urls')),
     path('shopper/',include('shopper.urls')),
     path('planner/',include('planner.urls')),
+    path('banking/',include('BankingApp.urls', namespace="BankingApp")),
 ]
 
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
