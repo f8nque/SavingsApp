@@ -353,14 +353,49 @@
             align-items: flex-start;
         }
 
+        /* Essential Table Overrides for Full-Screen Mobile Tabular Layout */
+        .table-wrapper {
+            overflow: hidden;
+            /* No scrolling */
+            width: 100%;
+        }
+
+        .table-sm {
+            width: 100%;
+            table-layout: fixed;
+            /* Force equal/proportional column widths to prevent blowout */
+        }
+
         .table-sm thead th {
-            padding: 0.5rem;
-            font-size: 0.65rem;
+            padding: 0.15rem !important;
+            font-size: 0.5rem !important;
+            word-wrap: break-word;
+            white-space: normal;
         }
 
         .table-sm tbody td {
-            padding: 0.4rem 0.5rem;
-            font-size: 0.75rem;
+            padding: 0.15rem !important;
+            font-size: 0.55rem !important;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .table-badge {
+            font-size: 0.45rem;
+            padding: 0.1rem 0.2rem;
+            display: inline-block;
+        }
+
+        .checkbox-col input[type="checkbox"] {
+            width: 10px;
+            height: 10px;
+            margin: 0;
+        }
+
+        .row-number {
+            font-size: 0.5rem;
+            display: block;
+            /* Stack under checkbox to save horizontal space */
         }
     }
 
@@ -423,26 +458,6 @@
         }
 
         .category-badge {
-            font-size: 0.65rem;
-            padding: 0.25rem 0.6rem;
-        }
-
-        .table-sm thead th {
-            padding: 0.4rem;
-            font-size: 0.6rem;
-        }
-
-        .table-sm tbody td {
-            padding: 0.35rem 0.4rem;
-            font-size: 0.7rem;
-        }
-
-        .checkbox-col input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-        }
-
-        .table-badge {
             font-size: 0.6rem;
             padding: 0.2rem 0.5rem;
         }
@@ -462,7 +477,8 @@
     <div class="stats-grid">
         <div class="stat-card">
             <h4><i class="fas fa-calendar"></i> Track Period</h4>
-            <div class="stat-value primary">{{ budgetdata.start_date|date:"M d" }} - {{ budgetdata.end_date|date:"M d, Y" }}</div>
+            <div class="stat-value primary">{{ budgetdata.start_date|date:"M d" }} - {{ budgetdata.end_date|date:"M d,
+                Y" }}</div>
         </div>
 
         <div class="stat-card">
@@ -500,7 +516,8 @@
 
         <div class="stat-card">
             <h4><i class="fas fa-check-circle"></i> Status</h4>
-            <span class="stat-badge {% if budgetdata.budget_status == 'on budget' %}badge-success{% else %}badge-danger{% endif %}">
+            <span
+                class="stat-badge {% if budgetdata.budget_status == 'on budget' %}badge-success{% else %}badge-danger{% endif %}">
                 {{ budgetdata.budget_status|upper }}
             </span>
         </div>
@@ -508,125 +525,129 @@
 
     <!-- Category Sections with Tables -->
     {% for group in groupdata %}
-        <div class="category-section">
-            <!-- Category Header -->
-            <div class="category-header">
-                <h3 class="category-title">
-                    <i class="fas fa-folder"></i> {{ group.category }}
-                </h3>
-                <div class="category-badges">
-                    <span class="category-badge">Budget: {{ group.budget_perc }}%</span>
-                    <span class="category-badge">Spent: {% if group.spent_perc > 100 %}<i class="fas fa-exclamation-triangle"></i>{% endif %} {{ group.spent_perc }}%</span>
-                    <span class="category-badge">Amount: {{ group.budget_total }}</span>
-                    <span class="category-badge">Spent: {{ group.spent_total }}</span>
-                    <span class="category-badge">Remaining: {{ group.remaining_total }}</span>
-                </div>
-            </div>
-
-            <!-- Category Table -->
-            <div class="table-wrapper">
-                <table class="table table-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th class="checkbox-col">
-                                <i class="fas fa-bars"></i>
-                            </th>
-                            <th>Item Name</th>
-                            <th>Budget %</th>
-                            <th>Spent %</th>
-                            <th>Budget Amount</th>
-                            <th>Amount Spent</th>
-                            <th>Remaining</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in datalist %}
-                            {% if data.category == group.category %}
-                                <tr>
-                                    <td class="checkbox-col">
-                                        <input type="checkbox" id="{{ data.name }}" />
-                                        <span id="{{ data.name }}_counter" class="row-number">{{ forloop.counter }}</span>
-                                    </td>
-                                    <td>{{ data.name }}</td>
-                                    <td>
-                                        <span class="table-badge badge-primary-light">{{ data.budget_perc }}%</span>
-                                    </td>
-                                    <td>
-                                        <span class="table-badge {% if data.spent_perc > 100 %}badge-danger-light{% else %}badge-success-light{% endif %}">
-                                            {{ data.spent_perc }}%
-                                        </span>
-                                    </td>
-                                    <td>{{ data.amount }}</td>
-                                    <td>{{ data.budget_spent }}</td>
-                                    <td>
-                                        {{ data.remaining_budget }}
-                                        <span class="table-badge badge-secondary-light">[W: {{ data.weighted }}]</span>
-                                    </td>
-                                    <td>
-                                        <span class="table-badge {% if data.budget_status == 'on budget' %}badge-success-light{% else %}badge-danger-light{% endif %}">
-                                            {{ data.budget_status }}
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                <!-- Log Rows -->
-                                {% for log in log_data %}
-                                    {% if data.id == log.budgetitem_id %}
-                                        <tr class="{{ data.name }}_log log-row" style="display:none;">
-                                            <td colspan="2" class="text-center">
-                                                <i class="fas fa-receipt"></i> Log Entry
-                                            </td>
-                                            <td class="text-center">{{ log.log_date }}</td>
-                                            <td colspan="2" class="text-center">
-                                                <strong>{{ log.amount }}</strong>
-                                            </td>
-                                            <td colspan="3" class="text-center">
-                                                {{ log.comment }}
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="category-section">
+        <!-- Category Header -->
+        <div class="category-header">
+            <h3 class="category-title">
+                <i class="fas fa-folder"></i> {{ group.category }}
+            </h3>
+            <div class="category-badges">
+                <span class="category-badge">Budget: {{ group.budget_perc }}%</span>
+                <span class="category-badge">Spent: {% if group.spent_perc > 100 %}<i
+                        class="fas fa-exclamation-triangle"></i>{% endif %} {{ group.spent_perc }}%</span>
+                <span class="category-badge">Amount: {{ group.budget_total }}</span>
+                <span class="category-badge">Spent: {{ group.spent_total }}</span>
+                <span class="category-badge">Remaining: {{ group.remaining_total }}</span>
             </div>
         </div>
+
+        <!-- Category Table -->
+        <div class="table-wrapper">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th class="checkbox-col">
+                            <i class="fas fa-bars"></i>
+                        </th>
+                        <th>Item Name</th>
+                        <th>Budget %</th>
+                        <th>Spent %</th>
+                        <th>Budget Amount</th>
+                        <th>Amount Spent</th>
+                        <th>Remaining</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in datalist %}
+                    {% if data.category == group.category %}
+                    <tr>
+                        <td class="checkbox-col" style="width: 5%;">
+                            <input type="checkbox" id="{{ data.name }}" />
+                            <span id="{{ data.name }}_counter" class="row-number">{{ forloop.counter }}</span>
+                        </td>
+                        <td style="width: 20%;">{{ data.name }}</td>
+                        <td style="width: 10%;">
+                            <span class="table-badge badge-primary-light">{{ data.budget_perc }}%</span>
+                        </td>
+                        <td style="width: 10%;">
+                            <span
+                                class="table-badge {% if data.spent_perc > 100 %}badge-danger-light{% else %}badge-success-light{% endif %}">
+                                {{ data.spent_perc }}%
+                            </span>
+                        </td>
+                        <td style="width: 15%;">{{ data.amount }}</td>
+                        <td style="width: 15%;">{{ data.budget_spent }}</td>
+                        <td style="width: 15%;">
+                            {{ data.remaining_budget }}
+                            <div class="table-badge badge-secondary-light">[W: {{ data.weighted }}]</div>
+                        </td>
+                        <td style="width: 10%;">
+                            <span
+                                class="table-badge {% if data.budget_status == 'on budget' %}badge-success-light{% else %}badge-danger-light{% endif %}">
+                                {{ data.budget_status }}
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Log Rows -->
+                    {% for log in log_data %}
+                    {% if data.id == log.budgetitem_id %}
+                    <tr class="{{ data.name }}_log log-row" style="display:none;">
+                        <td colspan="2" class="text-center">
+                            <i class="fas fa-receipt"></i> Log Entry
+                        </td>
+                        <td class="text-center">{{ log.log_date }}</td>
+                        <td colspan="2" class="text-center">
+                            <strong>{{ log.amount }}</strong>
+                        </td>
+                        <td colspan="3" class="text-center">
+                            {{ log.comment }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% empty %}
-        <div class="category-section">
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p><strong>No budget items found</strong></p>
-                <p>Create budget items to get started</p>
-            </div>
+    <div class="category-section">
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p><strong>No budget items found</strong></p>
+            <p>Create budget items to get started</p>
         </div>
+    </div>
     {% endfor %}
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         {% for data in datalist %}
-            const checkbox_{{ forloop.counter }} = document.getElementById("{{ data.name }}");
-            const counter_elem_{{ forloop.counter }} = document.getElementById("{{ data.name }}_counter");
+        const checkbox_{{ forloop.counter }
+    } = document.getElementById("{{ data.name }}");
+    const counter_elem_{{ forloop.counter }} = document.getElementById("{{ data.name }}_counter");
 
-            if (checkbox_{{ forloop.counter }}) {
-                checkbox_{{ forloop.counter }}.addEventListener('click', function(event) {
-                    const rows_class = "{{ data.name }}_log";
-                    const rowElems = document.getElementsByClassName(rows_class);
+    if (checkbox_{ { forloop.counter } }) {
+                checkbox_{ { forloop.counter } }.addEventListener('click', function (event) {
+        const rows_class = "{{ data.name }}_log";
+        const rowElems = document.getElementsByClassName(rows_class);
 
-                    for (let i = 0; i < rowElems.length; i++) {
-                        rowElems[i].style.display = event.target.checked ? "" : "none";
-                    }
-                });
+        for (let i = 0; i < rowElems.length; i++) {
+            rowElems[i].style.display = event.target.checked ? "" : "none";
+        }
+    });
 
-                // Check if has logs
-                const logRows = document.getElementsByClassName("{{ data.name }}_log");
-                if (logRows.length > 0) {
-                    counter_elem_{{ forloop.counter }}.classList.add('has-logs');
-                }
-            }
-        {% endfor %}
+        // Check if has logs
+        const logRows = document.getElementsByClassName("{{ data.name }}_log");
+        if (logRows.length > 0) {
+                    counter_elem_{ { forloop.counter } }.classList.add('has-logs');
+        }
+    }
+    {% endfor %}
     });
 </script>
 
