@@ -19,9 +19,18 @@
   .controls button{background:#fff;color:#216ca3;border:none;padding:.4rem .8rem;border-radius:6px;font-weight:600}
 
   .table-panel{background:#fff;border-radius:8px;padding:.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
-  table.table-sm{font-size:.9rem;margin-bottom:0}
+  .table-responsive {
+    overflow: hidden; /* Prevent native scroll */
+    width: 100%;
+  }
+
+  .table-sm {
+    width: 100%;
+    table-layout: fixed; /* Force constraint on widths */
+  }
+
   table.table-sm thead th{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;font-weight:700;font-size:.8rem;padding:.5rem .6rem}
-  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle;word-wrap: break-word; white-space: normal;}
   .badge-est{font-weight:600;color:#fff}
   .row-hidden{opacity:.45}
   .controls .help{font-size:.85rem;color:#6b7280;margin-left:1rem}
@@ -31,9 +40,30 @@
   .badge-danger-est { background:#e74c3c; color:#fff !important; padding:.2rem .45rem; border-radius:6px; }
   .badge-success-est { background:#27ae60; color:#fff !important; padding:.2rem .45rem; border-radius:6px; }
 
+  @media(max-width:768px){
+    table.table-sm thead th {
+        padding: 0.15rem !important;
+        font-size: 0.5rem !important;
+    }
+    table.table-sm tbody td {
+        padding: 0.15rem !important;
+        font-size: 0.55rem !important;
+    }
+    a.badge-est, .badge-danger-est, .badge-success-est {
+        padding: 0.1rem 0.2rem;
+        font-size: 0.45rem;
+    }
+  }
+
   @media(max-width:576px){
     .controls{flex-direction:column;align-items:stretch}
     .controls .help{margin-left:0;margin-top:.5rem}
+    table.table-sm thead th {
+        font-size: 0.45rem !important;
+    }
+    table.table-sm tbody td {
+        font-size: 0.5rem !important;
+    }
   }
 </style>
 
@@ -61,15 +91,15 @@
     <table class="table table-sm table-striped" id="estimate_table">
       <thead>
         <tr>
-          <th style="width:1%"></th>
-          <th style="width:3%">#</th>
-          <th>Category</th>
-          <th class="text-right">Total Spent</th>
-          <th class="text-right">Estimate</th>
-          <th class="text-right">Budgeted</th>
-          <th class="text-right">Budget Spent</th>
-          <th class="text-right">Remaining</th>
-          <th class="text-right">Remaining Estimate</th>
+          <th style="width:3%"></th>
+          <th style="width:5%">#</th>
+          <th style="width:20%">Category</th>
+          <th class="text-right" style="width:12%">Total Spent</th>
+          <th class="text-right" style="width:12%">Estimate</th>
+          <th class="text-right" style="width:12%">Budgeted</th>
+          <th class="text-right" style="width:12%">Budget Spent</th>
+          <th class="text-right" style="width:12%">Remaining</th>
+          <th class="text-right" style="width:12%">Rem. Est.</th>
         </tr>
       </thead>
       <tbody>

@@ -80,13 +80,15 @@
     }
 
     .table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow: hidden;
+        width: 100%;
     }
 
     /* Bootstrap Table Overrides for table-sm */
     .table-sm {
         margin-bottom: 0;
+        width: 100%;
+        table-layout: fixed;
     }
 
     .table-sm thead th {
@@ -117,6 +119,8 @@
         padding: 0.6rem 0.8rem;
         vertical-align: middle;
         border: none;
+        word-wrap: break-word;
+        white-space: normal;
     }
 
     .table-sm tbody tr:last-child {
@@ -127,27 +131,31 @@
     .col-no {
         font-weight: 600;
         color: #3498db;
-        width: 40px;
+        width: 5%;
         text-align: center;
     }
 
     .col-name {
         font-weight: 600;
-        width: 12%;
+        width: 15%;
+    }
+    
+    .col-desc {
+        width: 15%;
     }
 
     .col-amount {
         text-align: right;
         width: 10%;
-        padding-right: 1rem;
+        padding-right: 0.2rem !important;
     }
 
     .col-status {
-        width: 10%;
+        width: 15%;
     }
 
     .col-actions {
-        width: 18%;
+        width: 20%;
     }
 
     /* Badge Styling */
@@ -274,13 +282,13 @@
         }
 
         .table-sm thead th {
-            padding: 0.6rem;
-            font-size: 0.7rem;
+            padding: 0.15rem !important;
+            font-size: 0.5rem !important;
         }
 
         .table-sm tbody td {
-            padding: 0.5rem 0.6rem;
-            font-size: 0.8rem;
+            padding: 0.15rem !important;
+            font-size: 0.55rem !important;
         }
 
         .action-cell {
@@ -327,30 +335,40 @@
         }
 
         .table-sm thead th {
-            padding: 0.5rem;
-            font-size: 0.65rem;
+            padding: 0.1rem !important;
+            font-size: 0.45rem !important;
         }
 
         .table-sm tbody td {
-            padding: 0.4rem 0.5rem;
-            font-size: 0.75rem;
+            padding: 0.1rem !important;
+            font-size: 0.5rem !important;
         }
 
         .col-no {
-            width: 35px;
-            font-size: 0.8rem;
+            width: 5%;
+            font-size: 0.5rem;
         }
 
         .action-cell {
-            gap: 0.2rem;
+            gap: 0.1rem;
             flex-direction: column;
         }
 
         .badge-action {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.6rem;
+            padding: 0.15rem 0.25rem;
+            font-size: 0.45rem;
             width: 100%;
             justify-content: center;
+        }
+
+        .status-badge {
+            padding: 0.15rem 0.25rem;
+            font-size: 0.45rem;
+        }
+        
+        .burn-rate-text {
+            font-size: 0.45rem;
+            display: block;
         }
 
         .stats-card {
@@ -420,10 +438,10 @@
                     <tr>
                         <th class="col-no">#</th>
                         <th class="col-name">Budget Name</th>
-                        <th>Description</th>
-                        <th class="col-amount">Budget Amount</th>
-                        <th class="col-amount">Amount Spent</th>
-                        <th class="col-amount">Remaining</th>
+                        <th class="col-desc">Description</th>
+                        <th class="col-amount" style="width: 10%">B. Amt</th>
+                        <th class="col-amount" style="width: 10%">Spent</th>
+                        <th class="col-amount" style="width: 10%">Rem.</th>
                         <th class="col-status">Status</th>
                         <th class="col-actions">Actions</th>
                     </tr>
@@ -433,7 +451,7 @@
                         <tr>
                             <td class="col-no">{{ forloop.counter }}</td>
                             <td class="col-name">{{ data.name }}</td>
-                            <td>{{ data.description|truncatewords:3 }}</td>
+                            <td class="col-desc">{{ data.description|truncatewords:2 }}</td>
                             <td class="col-amount">{{ data.budget_total }}</td>
                             <td class="col-amount">
                                 {{ data.total_spent }}

@@ -22,8 +22,17 @@
   .summary-card .val{margin-top:.35rem;font-weight:800;font-size:1.25rem;color:#2c3e50}
 
   .table-panel{background:#fff;padding:.6rem;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
-  table.table-sm{margin-bottom:0}
-  table.table-sm thead th{
+  .table-responsive {
+    overflow: hidden; /* Prevent native scroll */
+    width: 100%;
+  }
+
+  .table-sm {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  table.table-sm thead th {
     background:linear-gradient(90deg,#2d9cdb,#216ca3);
     color:#fff;
     font-weight:700;
@@ -31,13 +40,41 @@
     padding:.5rem .6rem;
     vertical-align:middle;
   }
-  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle; word-wrap: break-word; white-space: normal;}
   .badge-good{background:#27ae60;color:#fff;padding:.35rem .55rem;border-radius:10px;font-weight:700}
   .badge-bad{background:#e74c3c;color:#fff;padding:.35rem .55rem;border-radius:10px;font-weight:700}
 
   .muted-small{font-size:.85rem;color:#6b7280}
+  
   @media(max-width:768px){
     .summary-strip{flex-direction:column}
+    
+    table.table-sm thead th {
+        padding: 0.2rem !important;
+        font-size: 0.55rem !important;
+    }
+    table.table-sm tbody td {
+        padding: 0.2rem !important;
+        font-size: 0.6rem !important;
+    }
+    .badge-good, .badge-bad {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.5rem;
+    }
+    .muted-small {
+        font-size: 0.55rem;
+    }
+  }
+
+  @media(max-width:480px){
+    table.table-sm thead th {
+        padding: 0.15rem !important;
+        font-size: 0.45rem !important;
+    }
+    table.table-sm tbody td {
+        padding: 0.15rem !important;
+        font-size: 0.5rem !important;
+    }
   }
 </style>
 
@@ -72,13 +109,13 @@
       <table class="table table-sm table-striped" summary="Budget performance listing">
         <thead>
           <tr>
-            <th style="width:3%">#</th>
-            <th>Budget Name</th>
-            <th class="text-right">Budget Total</th>
-            <th class="text-right">Budget Spent</th>
-            <th class="text-right">Budget Completed</th>
-            <th class="text-center">Burn Rate</th>
-            <th class="text-center">Completion Rate</th>
+            <th style="width:5%">#</th>
+            <th style="width:25%">Budget Name</th>
+            <th class="text-right" style="width:15%">Budget Total</th>
+            <th class="text-right" style="width:15%">Budget Spent</th>
+            <th class="text-right" style="width:15%">Budget Completed</th>
+            <th class="text-center" style="width:10%">Burn Rate</th>
+            <th class="text-center" style="width:15%">Completion Rate</th>
           </tr>
         </thead>
         <tbody>

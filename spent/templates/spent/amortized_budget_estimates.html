@@ -16,22 +16,52 @@
   .am-hero p{margin:.25rem 0 0;color:rgba(255,255,255,.95)}
 
   .panel{background:#fff;border-radius:8px;padding:.75rem;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+  .table-responsive {
+    overflow: hidden; /* Prevent horizontal scroll bar */
+    width: 100%;
+  }
+
+  table.table-sm {
+    width: 100%;
+    table-layout: fixed; /* Force fixed column widths */
+  }
+
   .controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem}
   .controls .btn{padding:.35rem .6rem;border-radius:6px;border:1px solid #d6e4f2;background:#f7fbff;color:#1f6fb5;font-weight:700}
   .controls .btn.primary{background:#3498db;color:#fff;border-color:transparent}
 
-  table.table-sm{font-size:.92rem;margin-bottom:0}
   table.table-sm thead th{background:#f8fafc;color:#2c3e50;font-weight:700;font-size:.78rem;padding:.5rem .6rem}
-  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle;word-wrap: break-word; white-space: normal;}
   .chk-col{text-align:center;width:48px}
   .actions-row{display:flex;gap:.4rem;justify-content:center}
 
   .btn-ghost{background:transparent;border:1px solid #e6eef8;color:#34495e;padding:.35rem .6rem;border-radius:6px}
   .muted-small{font-size:.85rem;color:#6b7280}
 
+  @media(max-width:768px){
+    table.table-sm thead th {
+        padding: 0.15rem !important;
+        font-size: 0.5rem !important;
+    }
+    table.table-sm tbody td {
+        padding: 0.15rem !important;
+        font-size: 0.55rem !important;
+    }
+    .muted-small {
+        font-size: 0.55rem;
+    }
+  }
+
   @media(max-width:576px){
     .controls{flex-direction:column;align-items:stretch}
     .chk-col{width:36px}
+    table.table-sm thead th {
+        font-size: 0.45rem !important;
+    }
+    table.table-sm tbody td {
+        font-size: 0.5rem !important;
+        padding: 0.1rem !important;
+    }
   }
 </style>
 
@@ -53,13 +83,13 @@
       <caption id="amortized-estimates" class="sr-only">Amortized budget estimates table</caption>
       <thead>
         <tr>
-          <th class="chk-col"><input type="checkbox" id="select_all" aria-label="Select all rows"></th>
-          <th>#</th>
-          <th>Budget Item</th>
-          <th class="text-right">Average</th>
-          <th class="text-right">Last 1 Month</th>
-          <th class="text-right">Last 3 Months</th>
-          <th class="text-right">Last 6 Months</th>
+          <th style="width:5%"><input type="checkbox" id="select_all" aria-label="Select all rows"></th>
+          <th style="width:5%">#</th>
+          <th style="width:30%">Budget Item</th>
+          <th class="text-right" style="width:15%">Avg</th>
+          <th class="text-right" style="width:15%">Last 1 Mo</th>
+          <th class="text-right" style="width:15%">Last 3 Mo</th>
+          <th class="text-right" style="width:15%">Last 6 Mo</th>
         </tr>
       </thead>
       <tbody>
