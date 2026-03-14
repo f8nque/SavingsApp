@@ -13,9 +13,38 @@
     }
 
     .info-header h1 {
-        margin-bottom: 1.5rem;
+        margin-bottom: 0;
         font-weight: 700;
         font-size: 2rem;
+    }
+    
+    .header-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-add-spent {
+        background-color: white;
+        color: #2980b9;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-add-spent:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        color: #2c3e50;
     }
 
     .stats-container {
@@ -82,8 +111,15 @@
         margin-top: 2rem;
     }
 
+    .table-responsive {
+        overflow: hidden; /* Prevent horizontal scroll */
+        width: 100%;
+    }
+
     .table {
         margin-bottom: 0;
+        width: 100%;
+        table-layout: fixed;
     }
 
     .table thead {
@@ -92,11 +128,11 @@
     }
 
     .table thead th {
-        padding: 1rem;
+        padding: 0.8rem;
         font-weight: 600;
         border: none;
         text-transform: uppercase;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         letter-spacing: 0.5px;
     }
 
@@ -111,8 +147,11 @@
     }
 
     .table tbody td {
-        padding: 1.2rem;
+        padding: 0.8rem;
         vertical-align: middle;
+        word-wrap: break-word; 
+        white-space: normal;
+        font-size: 0.85rem;
     }
 
     .badge-custom {
@@ -225,9 +264,74 @@
             font-size: 0.85rem;
         }
 
-        .table thead th,
+        .table thead th {
+            padding: 0.2rem !important;
+            font-size: 0.5rem !important;
+        }
+
         .table tbody td {
-            padding: 0.7rem;
+            padding: 0.2rem !important;
+            font-size: 0.55rem !important;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .btn-sm-custom {
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.5rem;
+            text-align: center;
+        }
+        
+        .badge-custom {
+            padding: 0.15rem 0.3rem;
+            font-size: 0.45rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .info-header {
+            padding: 1.2rem;
+        }
+
+        .info-header h1 {
+            font-size: 1.2rem;
+        }
+        
+        .btn-add-spent {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .table thead th {
+            padding: 0.1rem !important;
+            font-size: 0.45rem !important;
+        }
+
+        .table tbody td {
+            padding: 0.1rem !important;
+            font-size: 0.5rem !important;
+        }
+        
+        .btn-sm-custom {
+            padding: 0.15rem 0.25rem;
+            font-size: 0.45rem;
+        }
+        
+        .badge-custom {
+            padding: 0.1rem 0.2rem;
+            font-size: 0.4rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-card .value {
+            font-size: 1.4rem;
         }
 
         .action-buttons {
@@ -251,7 +355,12 @@
 
 <!-- Header Section -->
 <div class="info-header">
-    <h1><i class="fas fa-shopping-cart"></i> Daily Spent List</h1>
+    <div class="header-top-row">
+        <h1><i class="fas fa-shopping-cart"></i> Daily Spent List</h1>
+        <a href="{% url 'add_spent' %}" class="btn-add-spent">
+            <i class="fas fa-plus-circle"></i> Add Entry
+        </a>
+    </div>
     
     <div class="stats-container">
         <!-- Total Spent Card -->
@@ -365,13 +474,13 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th><i class="fas fa-hashtag"></i> No</th>
-                    <th><i class="fas fa-calendar"></i> Date</th>
-                    <th><i class="fas fa-week"></i> Day</th>
-                    <th><i class="fas fa-tag"></i> Category</th>
-                    <th><i class="fas fa-money-bill"></i> Amount</th>
-                    <th><i class="fas fa-comment"></i> Reason</th>
-                    <th><i class="fas fa-cog"></i> Actions</th>
+                    <th style="width: 5%;"><i class="fas fa-hashtag"></i> No</th>
+                    <th style="width: 15%;"><i class="fas fa-calendar"></i> Date</th>
+                    <th style="width: 10%;"><i class="fas fa-week"></i> Day</th>
+                    <th style="width: 15%;"><i class="fas fa-tag"></i> Category</th>
+                    <th style="width: 15%;"><i class="fas fa-money-bill"></i> Amount</th>
+                    <th style="width: 25%;"><i class="fas fa-comment"></i> Reason</th>
+                    <th style="width: 15%;"><i class="fas fa-cog"></i> Actions</th>
                 </tr>
             </thead>
             <tbody>
