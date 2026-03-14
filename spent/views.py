@@ -1103,7 +1103,7 @@ class DailyListView(LoginRequiredMixin,View):
                 select sum(s.amount) as amount_spent
                 from spent_tracking tr
                 inner join spent_spent s on tr.spent_id_id = s.id
-                where tr.voided = 0
+                where tr.voided = 0 and s.voided = 0 
                 and (tr.track_id_id, tr.user_id_id) in
                 (
                 select t.id,t.user_id_id

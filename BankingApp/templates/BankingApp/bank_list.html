@@ -1,0 +1,144 @@
+<!-- templates/banking/bank_list.html -->
+{% extends 'BankingApp/base.html' %}
+
+{% block title %}Banks - Banking App{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h2 mb-0">
+                <i class="fas fa-building-columns me-2"></i>Bank Accounts
+            </h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBankModal">
+                <i class="fas fa-plus me-2"></i>Add Bank Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Active Banks</h5>
+                <h2>{{ active_count }} / {{ total_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Balance</h5>
+                <h2>ksh {{ total_balance|floatformat:2 }}</h2>
+                <small class="opacity-75">Active banks only</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Overall Progress</h5>
+                <h2>{{ overall_progress|floatformat:1 }}%</h2>
+                <small class="opacity-75">Active banks only</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Cards -->
+<div class="row">
+    {% for bank in banks %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="card h-100 card-hover {% if not bank.is_active %}opacity-75{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    {{ bank.bank_name }}
+                    {% if not bank.is_active %}
+                        <i class="fas fa-pause-circle text-warning ms-1" title="Inactive"></i>
+                    {% endif %}
+                </h5>
+                <div>
+                    <span class="badge bg-secondary">{{ bank.get_category_display }}</span>
+                    {% if bank.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-warning">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {% if bank.minimumAlert %}
+                    <p class="alert alert-danger card-text text-muted">Balance less than Minimum Amount {{bank.minimum_amount}}</p>
+                    {% endif %}
+                    <h3 class="{% if bank.is_active %}text-success{% else %}text-muted{% endif %}">
+                        ksh {{ bank.current_balance|floatformat:2 }}
+                    </h3>
+                    <p class="text-muted mb-1">Target: ksh {{ bank.target_amount|floatformat:2 }}</p>
+                    <div class="progress progress-custom">
+                        <div class="progress-bar {% if not bank.is_active %}bg-secondary{% endif %}" role="progressbar"
+                             style="width: {{ bank.progress_percentage }}%"
+                             aria-valuenow="{{ bank.progress_percentage }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ bank.progress_percentage|floatformat:1 }}% of target</small>
+                    {% if not bank.is_active %}
+                        <small class="text-warning d-block mt-1">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Not included in analysis
+                        </small>
+                    {% endif %}
+                </div>
+
+                {% if bank.bank_description %}
+                <p class="card-text text-muted">{{ bank.bank_description|truncatechars:100 }}</p>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ bank.created_at|date:"M d, Y" }}
+                    </small>
+                    <div>
+                        <a href="{% url 'BankingApp:bank_detail' bank.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-building-columns fa-3x text-muted mb-3"></i>
+                <h4>No Bank Accounts Yet</h4>
+                <p class="text-muted">Start by adding your first bank account to track your finances.</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBankModal">
+                    <i class="fas fa-plus me-2"></i>Add First Bank Account
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Bank Modal (placeholder) -->
+<div class="modal fade" id="addBankModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Bank Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">This would contain a form to add new bank accounts. Implementation would require additional form handling in views.py</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

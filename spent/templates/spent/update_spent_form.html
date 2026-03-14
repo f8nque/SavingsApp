@@ -1,17 +1,137 @@
-{%extends "base.html"%}
-{% load crispy_forms_tags %}
-{% block title %} Spent | UpdateSpent {%endblock title %}
+{% extends "base.html" %}
+{% block title %} Spent | Update {% endblock title %}
+
+{% block head %}
+<style>
+    .update-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-top: 2rem;
+        background-color: white;
+    }
+    .update-card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .update-card-header h2 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+    .update-card-body {
+        padding: 2.5rem;
+    }
+    .btn-update {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .btn-update:hover {
+        background-color: #219a52;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+    }
+    .btn-cancel {
+        background-color: #95a5a6;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    .btn-cancel:hover {
+        background-color: #7f8c8d;
+        color: white;
+    }
+    
+    /* Better spacing for form fields */
+    .update-card-body p {
+        margin-bottom: 1.25rem;
+    }
+    .update-card-body label {
+        display: block;
+        font-weight: 500;
+        color: var(--primary-color);
+        margin-bottom: 0.4rem;
+    }
+    .helptext {
+        font-size: 0.85rem;
+        color: #6c757d;
+        display: block;
+        margin-top: 0.25rem;
+    }
+    .form-group.form-control {
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        border: 1px solid #dee2e6;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .form-group.form-control:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+</style>
+{% endblock head %}
+
 {% block content %}
-<h1 class="text-center text-primary font-weight-bold">UPDATE FORM</h1>
-<hr/>
-<form action="" method="post">
-    {% csrf_token %}
-    {% if error %}
-        <div class="alert alert-danger">
-            {{error }}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card update-card">
+            <div class="update-card-header">
+                <h2><i class="fas fa-edit me-2"></i>Update Record</h2>
+            </div>
+            
+            <div class="update-card-body">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    
+                    {% if error %}
+                        <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <div>{{ error }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger mb-4">
+                            <strong><i class="fas fa-exclamation-triangle me-2"></i>Please correct the errors below:</strong>
+                        </div>
+                    {% endif %}
+
+                    <div class="form-fields">
+                        {{ form }}
+                    </div>
+                    
+                    <div class="row mt-4 pt-4 border-top">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <a href="javascript:history.back()" class="btn-cancel">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn-update">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-    {% endif %}
-  {{form|crispy }}
-  <button type="submit" class="btn btn-primary">Update</button>
-</form>
+    </div>
+</div>
 {% endblock content %}

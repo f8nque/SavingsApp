@@ -5,87 +5,122 @@
 {% endblock head %}
 
 {% block content %}
-<h3 class="text-center text-success font-weight-bold">CURRENT BUDGET ESTIMATION </h3>
+<style>
+  .estimate-hero{
+    background:linear-gradient(135deg,#2d9cdb,#216ca3);
+    color:#fff;padding:1rem;border-radius:8px;margin-bottom:1rem;
+    box-shadow:0 6px 18px rgba(33,108,163,0.07);text-align:center
+  }
+  .estimate-hero h3{margin:0;font-weight:700}
+  .estimate-meta{color:rgba(255,255,255,0.9);margin-top:.35rem;font-size:.95rem}
 
-<div class="mx-0 text-secondary font-weight-bold">
-    <h3 class="font-weight-bold text-center">
-   	The Summary below tries to estimate the current budget based on previous budget spents.
-        Period: From <span class="text-primary">{{start_date}}</span> To <span class="text-primary">{{end_date}}</span>: [{{days}} Days]
-        <span class= "badge badge-secondary">Remaining Days: [{{days_remaining}} Days]</span>
+  .controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;justify-content:center;margin:.85rem 0}
+  .controls input[type="date"]{border:1px solid #e6eef8;padding:.35rem .5rem;border-radius:6px}
+  .controls button{background:#fff;color:#216ca3;border:none;padding:.4rem .8rem;border-radius:6px;font-weight:600}
 
-    </h3>
+  .table-panel{background:#fff;border-radius:8px;padding:.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+  table.table-sm{font-size:.9rem;margin-bottom:0}
+  table.table-sm thead th{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;font-weight:700;font-size:.8rem;padding:.5rem .6rem}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  .badge-est{font-weight:600;color:#fff}
+  .row-hidden{opacity:.45}
+  .controls .help{font-size:.85rem;color:#6b7280;margin-left:1rem}
+
+  /* ensure category badges are visible and readable */
+  a.badge-est { text-decoration:none; display:inline-block; padding:.25rem .5rem; border-radius:6px; background:#3498db; color:#fff !important; }
+  .badge-danger-est { background:#e74c3c; color:#fff !important; padding:.2rem .45rem; border-radius:6px; }
+  .badge-success-est { background:#27ae60; color:#fff !important; padding:.2rem .45rem; border-radius:6px; }
+
+  @media(max-width:576px){
+    .controls{flex-direction:column;align-items:stretch}
+    .controls .help{margin-left:0;margin-top:.5rem}
+  }
+</style>
+
+<div class="estimate-hero" role="region" aria-label="Budget estimation summary">
+  <h3>CURRENT BUDGET ESTIMATION</h3>
+  <div class="estimate-meta">
+    Period: From <strong class="text-light">{{ start_date }}</strong> To <strong class="text-light">{{ end_date }}</strong>
+    — <strong>{{ days }}</strong> days
+    <span class="badge badge-light text-primary ml-2">Remaining: {{ days_remaining }} days</span>
+  </div>
 </div>
-    <div class="text-center">
-        <form action="" method="post">
-            {% csrf_token %}
-            <label for="start_date" >StartDate:</label>
-            <input type="date" name="start_date" id="start_date" value="{{start_date|date:'Y-m-d'}}"/>
-            <label for="end_date" >EndDate:</label>
-            <input type="date" name="end_date" id="end_date" value="{{end_date|date:'Y-m-d'}}"/>
-            <button class="btn btn-outline-primary">Filter</button>
-        </form>
-    </div>
 
-    <div>
+<div class="table-panel">
+  <form method="post" class="controls" aria-label="Filter budget estimate">
+    {% csrf_token %}
+    <label for="start_date" class="sr-only">Start Date</label>
+    <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+    <label for="end_date" class="sr-only">End Date</label>
+    <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+    <button type="submit">Apply</button>
+    <div class="help">Showing estimate for <strong>{{ today|date:"M, Y" }}</strong> ({{ month_days }} days)</div>
+  </form>
 
-        <table class="table table-sm">
-            <thead>
-                <th></th>
-               <th>#</th> <th>Category</th><th>Total Spent</th>
-               <th>Budget Estimate</th>
-               <th>Budgeted Amount</th><td>Budget Spent</td><td>Remaining Budget</td>
-               <th>Remaining Estimate
-               <span class="badge badge-primary">{{today|date:'M, Y'}} [{{month_days}}]</span></th>
+  <div class="table-responsive" style="margin-top:.75rem">
+    <table class="table table-sm table-striped" id="estimate_table">
+      <thead>
+        <tr>
+          <th style="width:1%"></th>
+          <th style="width:3%">#</th>
+          <th>Category</th>
+          <th class="text-right">Total Spent</th>
+          <th class="text-right">Estimate</th>
+          <th class="text-right">Budgeted</th>
+          <th class="text-right">Budget Spent</th>
+          <th class="text-right">Remaining</th>
+          <th class="text-right">Remaining Estimate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for data in graph %}
+          <tr id="row_{{ data.category|slugify }}" data-category="{{ data.category }}">
+            <td class="text-center">
+              <input type="checkbox" class="toggle-row" id="chk_{{ forloop.counter }}" aria-label="Toggle {{ data.category }}">
+            </td>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <a class="badge-est" target="_blank" rel="noopener noreferrer"
+                 href="https://gachau.pythonanywhere.com/categoryselection/{{ start_date|date:'Y-m-d' }}/{{ end_date|date:'Y-m-d' }}/{{ data.category }}/">
+                {{ data.category }}
+              </a>
+            </td>
+            <td class="text-right">{{ data.specified_period_spent }}</td>
+            <td class="text-right">{{ data.current_month_estimate }} &plusmn; <span class="text-muted">{{ data.specified_period_stddev }}</span></td>
+            <td class="text-right">
+              {{ data.ba }}
+              {% if data.budget_minus_estimate < 0 %}
+                <span class="badge-danger-est">({{ data.budget_minus_estimate }})</span>
+              {% else %}
+                <span class="badge-success-est">({{ data.budget_minus_estimate }})</span>
+              {% endif %}
+            </td>
+            <td class="text-right">{{ data.bs }}</td>
+            <td class="text-right">{{ data.bd }}</td>
+            <td class="text-right">
+              {{ data.estimate_remaining }}
+              {% if data.remaining_month_est < 0 %}
+                <span class="badge-danger-est">({{ data.remaining_month_est }})</span>
+              {% else %}
+                <span class="badge-success-est">({{ data.remaining_month_est }})</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
-            </thead>
-            <tbody>
-                {% for data in graph  %}
-                <tr id="row_{{data.category}}">
-                    <td><input type="checkbox" id="{{data.category}}"/></td>
-                    <td>{{forloop.counter}}</td>
-                    <td><a class="badge badge-primary" target="_blank" rel="noopener noreferrer"
-                    href="https://gachau.pythonanywhere.com/categoryselection/{{start_date|date:'Y-m-d'}}/{{end_date|date:'Y-m-d'}}/{{data.category}}/">
-                        {{data.category}}</a></td>
-                    <td>{{data.specified_period_spent}}</td>
-                    <td>{{data.current_month_estimate}} +/- <span class="text-secondary">{{data.specified_period_stddev}}</span></td>
-                    <td> {{data.ba}} |
-                    {% if data.budget_minus_estimate < 0 %}
-                    <span class="badge badge-danger">({{data.budget_minus_estimate}})</span>
-                    {% else %}
-                    <span class="badge badge-success">({{data.budget_minus_estimate}})</span>
-                    {% endif %}
-                     </td>
-                    <td>{{data.bs}}</td>
-                    <td>{{data.bd}}</td>
-                    <td>{{data.estimate_remaining}} |
-                    {% if data.remaining_month_est < 0 %}
-                    <span class="badge badge-danger">({{data.remaining_month_est}})</span>
-                    {% else %}
-                    <span class="badge badge-success">({{data.remaining_month_est}})</span>
-                    {% endif %}
-                     </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <script>
-             function hideRow(event){
-            	if(event.target.checked){
-            	  var check_id = event.target.getAttribute("id");
-            	  var row_id = "row_"+check_id;
-            	  var rowElem = document.getElementById(row_id);
-            	  rowElem.style.display="none";
-            	}
-            }
-            {% for data in graph %}
-            document.getElementById("{{data.category}}").addEventListener('click',hideRow);
-            {% endfor %}
-
-
-
-
-        </script>
-
-    </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.toggle-row').forEach(function(cb){
+      cb.addEventListener('change', function(e){
+        const row = e.target.closest('tr');
+        if(!row) return;
+        row.style.display = e.target.checked ? 'none' : '';
+      });
+    });
+  });
+</script>
 {% endblock content %}

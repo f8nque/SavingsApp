@@ -1,26 +1,491 @@
 {% extends "base.html" %}
-{% block title %}
-Category | Category List
-{% endblock title %}
+{% block title %}Category | Category List{% endblock title %}
 {% block content %}
-<h1 class="text-center text-primary font-weight-bold">CATEGORY LIST</h1>
-<hr/>
-<table class="table table-striped table-sm">
-    <tr class="thead-dark">
-        <th>No</th> <th>Category</th> <th>Date Created</th><th>as_savings</th><th>Budget Category</th><th>InActive</th>
-    </tr>
 
-   {% for data in object_list %}
-    <tr>
-        <td>{{forloop.counter}}</td><td>{{data.category}}</td><td>{{data.date}}</td><td>{{data.as_savings}}</td>
-        <td>{{data.budget_category}}</td>
-        <td>{{data.inactive}}</td>
-        <td><a class="badge badge-pill badge-primary" href="{%url 'update_category' data.id %}">update</a></td> <td><a class="badge badge-pill badge-danger" href="{%url "delete_category" data.id%}">delete</a></td>
-    </tr>
-    {% endfor %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-</table>
+    .page-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
 
+    .header-content {
+        flex: 1;
+    }
 
-{% endblock content%}
+    .btn-add {
+        background-color: #27ae60;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .btn-add:hover {
+        background-color: #229954;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        color: white;
+    }
+
+    /* Table Container */
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    /* Table Styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    table thead {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    table thead th {
+        padding: 1.2rem;
+        text-align: left;
+        border: none;
+    }
+
+    table tbody tr {
+        border-bottom: 1px solid #ecf0f1;
+        transition: all 0.3s ease;
+    }
+
+    table tbody tr:hover {
+        background-color: #f8f9fa;
+        box-shadow: inset 0 0 5px rgba(52, 152, 219, 0.1);
+    }
+
+    table tbody td {
+        padding: 1rem 1.2rem;
+        vertical-align: middle;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+
+    table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Column Styling */
+    .col-counter {
+        font-weight: 600;
+        color: #3498db;
+        width: 50px;
+    }
+
+    .col-category {
+        font-weight: 600;
+        color: #2c3e50;
+        width: 20%;
+    }
+
+    .col-date {
+        color: #7f8c8d;
+        width: 15%;
+    }
+
+    .col-badge {
+        width: 12%;
+    }
+
+    /* Badge Styling */
+    .badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .badge-yes {
+        background-color: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .badge-no {
+        background-color: #fadbd8;
+        color: #e74c3c;
+    }
+
+    .badge-inactive {
+        background-color: #f4ecf7;
+        color: #8e44ad;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+
+    .btn-update {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-update:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #bdc3c7;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+
+    /* Stats Card */
+    .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .stats-icon {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .stats-content h3 {
+        margin: 0 0 0.3rem 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stats-content p {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #3498db;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .btn-add {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table thead th {
+            padding: 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        table tbody td {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .col-counter {
+            width: 40px;
+        }
+
+        .col-category {
+            width: 18%;
+        }
+
+        .col-date {
+            width: 15%;
+        }
+
+        .action-buttons {
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        .stats-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.2rem;
+            gap: 0.5rem;
+        }
+
+        .page-header h1 i {
+            font-size: 1.5rem;
+        }
+
+        .btn-add {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        table {
+            font-size: 0.8rem;
+        }
+
+        table thead th {
+            padding: 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        table tbody td {
+            padding: 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .col-counter {
+            width: 35px;
+        }
+
+        .badge {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+        }
+
+        .btn-action {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        .btn-action i {
+            display: none;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+        }
+
+        .stats-card {
+            padding: 1.2rem;
+            gap: 1rem;
+        }
+
+        .stats-content p {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Stats Card -->
+<div class="stats-card">
+    <div class="stats-icon">
+        <i class="fas fa-tags"></i>
+    </div>
+    <div class="stats-content">
+        <h3>Total Categories</h3>
+        <p>{{ object_list|length }}</p>
+    </div>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <h1>
+            <i class="fas fa-list"></i> Category List
+        </h1>
+        <p>View and manage all spending categories</p>
+    </div>
+    <a href="{% url 'add_category' %}" class="btn-add">
+        <i class="fas fa-plus-circle"></i> Add Category
+    </a>
+</div>
+
+<!-- Table Container -->
+<div class="table-container">
+    {% if object_list %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-counter">#</th>
+                        <th class="col-category">Category</th>
+                        <th class="col-date">Date Created</th>
+                        <th class="col-badge">As Savings</th>
+                        <th class="col-badge">Budget Category</th>
+                        <th class="col-badge">Inactive</th>
+                        <th style="width: 18%; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in object_list %}
+                        <tr>
+                            <td class="col-counter">{{ forloop.counter }}</td>
+                            <td class="col-category">{{ data.category }}</td>
+                            <td class="col-date">{{ data.date|date:"M d, Y" }}</td>
+                            <td class="col-badge">
+                                <span class="badge {% if data.as_savings %}badge-yes{% else %}badge-no{% endif %}">
+                                    {% if data.as_savings %}Yes{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td class="col-badge">
+                                <span class="badge {% if data.budget_category %}badge-yes{% else %}badge-no{% endif %}">
+                                    {% if data.budget_category %}Yes{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td class="col-badge">
+                                <span class="badge {% if data.inactive %}badge-inactive{% else %}badge-yes{% endif %}">
+                                    {% if data.inactive %}Yes{% else %}No{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'update_category' data.id %}" class="btn-action btn-update">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{% url 'delete_category' data.id %}" class="btn-action btn-delete" onclick="return confirm('Are you sure you want to delete this category?');">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p><strong>No categories found</strong></p>
+            <p>Create your first category to get started</p>
+            <a href="{% url 'add_category' %}" class="btn-add" style="margin-top: 1rem;">
+                <i class="fas fa-plus-circle"></i> Add Category
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock content %}

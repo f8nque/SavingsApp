@@ -1,52 +1,122 @@
 {% extends "base.html" %}
-{%block title %} Budget | Budget Performance {% endblock title %}
+{% block title %} Budget | Budget Performance {% endblock title %}
 
 {% block content %}
-<h3 class="text-center text-success font-weight-bold">BUDGET PERFORMANCE </h3>
-<h4 class="font-weight-bold text-center text-secondary ">Analyzes Budget Spent in the last 15 Months</h4>
-<h5 class="font-weight-bold text-center text-secondary">Checks whether Budget Goals were Achieved by Comparing Budget Completion Rate vs Budget Burn rate</h5>
-<h5 class="font-weight-bold text-center text-secondary">Budget Burn rate <= 100% [Green] > 100% [Red]</h5>
-<h5 class="font-weight-bold text-center text-secondary">Budget Completion rate < 85% [Red] > 85% [Green]</h5>
-    <div>
+<style>
+  .bp-hero{
+    background: linear-gradient(135deg,#27ae60,#1f9a56);
+    color:#fff;
+    padding:1.25rem;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(37,154,86,0.08);
+    margin-bottom:1rem;
+  }
+  .bp-hero h3{margin:0;font-weight:800;letter-spacing:.4px}
+  .bp-hero p{margin:.35rem 0 0;opacity:.95;font-size:.95rem}
 
-        <table class="table table-sm">
-            <thead>
-               <th>#</th>
-               <th>Budget Name</th>
-               <th>Budget Total</th>
-               <th>Budget Spent</th>
-               <th>Budget Completed</th>
-               <th>Burn Rate</th>
-               <th>Completion Rate</th>
+  .perf-wrap{max-width:1100px;margin:0 auto;padding:0 0.5rem}
+  .summary-strip{display:flex;gap:.75rem;flex-wrap:wrap;margin:1rem 0 1.25rem}
+  .summary-card{flex:1;min-width:160px;background:#fff;padding:.75rem 1rem;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.04);text-align:center}
+  .summary-card h5{margin:0;font-size:.78rem;color:#6b7280;text-transform:uppercase}
+  .summary-card .val{margin-top:.35rem;font-weight:800;font-size:1.25rem;color:#2c3e50}
 
-            </thead>
-            <tbody>
-                {% for b,data in performance_data.items %}
-                <tr>
-                    <td>{{forloop.counter}}</td>
-                    <td>{{data.name}}</></td>
-                    <td>{{data.performance.budget_amount}}</td>
-                    <td>{{data.performance.budget_spent}}</td>
-                    <td>{{data.performance.budget_completed}}</td>
-                    <td>
-                        <span
-                        {% if data.performance.budget_spent_perc > 100 %} class="badge badge-danger"
-                        {% else %} class="badge badge-success"
-                        {%endif%}>
-                            {{data.performance.budget_spent_perc}}%
-                        </span>
-                    </td>
-                    <td>
-                        <span
-                        {% if data.performance.budget_completed_perc < 85 %} class="badge badge-danger"
-                        {% else %} class="badge badge-success"
-                        {%endif%}>
-                            {{data.performance.budget_completed_perc}}%
-                        </span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+  .table-panel{background:#fff;padding:.6rem;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+  table.table-sm{margin-bottom:0}
+  table.table-sm thead th{
+    background:linear-gradient(90deg,#2d9cdb,#216ca3);
+    color:#fff;
+    font-weight:700;
+    font-size:.78rem;
+    padding:.5rem .6rem;
+    vertical-align:middle;
+  }
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  .badge-good{background:#27ae60;color:#fff;padding:.35rem .55rem;border-radius:10px;font-weight:700}
+  .badge-bad{background:#e74c3c;color:#fff;padding:.35rem .55rem;border-radius:10px;font-weight:700}
+
+  .muted-small{font-size:.85rem;color:#6b7280}
+  @media(max-width:768px){
+    .summary-strip{flex-direction:column}
+  }
+</style>
+
+<div class="perf-wrap">
+  <div class="bp-hero" role="region" aria-label="Budget performance summary">
+    <h3><i class="fas fa-tachometer-alt" aria-hidden="true"></i> Budget Performance</h3>
+    <p>Analysis of budget spend over the last 15 months — Burn rate vs Completion rate</p>
+  </div>
+
+  <div class="summary-strip" aria-hidden="false">
+    <div class="summary-card">
+      <h5>Total Budgets</h5>
+      <div class="val">{{ performance_data|length }}</div>
+      <div class="muted-small">Tracked items</div>
     </div>
+
+    <div class="summary-card">
+      <h5>Avg Burn Rate</h5>
+      <div class="val">{{ avg_burn_rate|default:"—" }}%</div>
+      <div class="muted-small"><=100% = healthy</div>
+    </div>
+
+    <div class="summary-card">
+      <h5>Avg Completion</h5>
+      <div class="val">{{ avg_completion_rate|default:"—" }}%</div>
+      <div class="muted-small">>=85% = target</div>
+    </div>
+  </div>
+
+  <div class="table-panel" role="table" aria-label="Budget performance table">
+    <div class="table-responsive">
+      <table class="table table-sm table-striped" summary="Budget performance listing">
+        <thead>
+          <tr>
+            <th style="width:3%">#</th>
+            <th>Budget Name</th>
+            <th class="text-right">Budget Total</th>
+            <th class="text-right">Budget Spent</th>
+            <th class="text-right">Budget Completed</th>
+            <th class="text-center">Burn Rate</th>
+            <th class="text-center">Completion Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b,data in performance_data.items %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <strong>{{ data.name }}</strong>
+                {% if data.note %}
+                  <div class="muted-small">{{ data.note }}</div>
+                {% endif %}
+              </td>
+              <td class="text-right">{{ data.performance.budget_amount }}</td>
+              <td class="text-right">{{ data.performance.budget_spent }}</td>
+              <td class="text-right">{{ data.performance.budget_completed }}</td>
+              <td class="text-center">
+                {% if data.performance.budget_spent_perc > 100 %}
+                  <span class="badge-bad" aria-label="Over burn rate">{{ data.performance.budget_spent_perc }}%</span>
+                {% else %}
+                  <span class="badge-good" aria-label="Healthy burn rate">{{ data.performance.budget_spent_perc }}%</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if data.performance.budget_completed_perc < 85 %}
+                  <span class="badge-bad" aria-label="Low completion">{{ data.performance.budget_completed_perc }}%</span>
+                {% else %}
+                  <span class="badge-good" aria-label="Good completion">{{ data.performance.budget_completed_perc }}%</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center muted-small">No performance data available.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock content %}

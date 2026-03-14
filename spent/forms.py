@@ -12,7 +12,7 @@ class CategoryForm(forms.ModelForm):
         widgets = {
             'date': forms.TextInput(attrs={'type': 'date','value':tz.now().date(),'class':'form-group form-control'}),
             'category':forms.TextInput(attrs={'class':'form-group form-control'}),
-            'as_savings':forms.CheckboxInput(attrs={'class':'form-group form-control'}),
+            'as_savings':forms.CheckboxInput(attrs={'class':'form-group'}),
             'budget_category':forms.Select(attrs={'class':'form-group form-control'})
         }
 
@@ -26,8 +26,8 @@ class UpdateCategoryForm(forms.ModelForm):
         widgets = {
             'date': forms.TextInput(attrs={'type': 'date','value':tz.now().date(),'class':'form-group form-control'}),
             'category':forms.TextInput(attrs={'class':'form-group form-control'}),
-            'inactive':forms.CheckboxInput(attrs={'class':'form-group form-control'}),
-            'as_savings':forms.CheckboxInput(attrs={'class':'form-group form-control'}),
+            'inactive':forms.CheckboxInput(attrs={'class':'form-group'}),
+            'as_savings':forms.CheckboxInput(attrs={'class':'form-group'}),
             'budget_category':forms.Select(attrs={'class':'form-group form-control'})
         }
 

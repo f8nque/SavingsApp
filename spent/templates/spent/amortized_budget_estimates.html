@@ -2,51 +2,127 @@
 {%block title %} Budget | Amortized Estimates{% endblock title %}
 
 {% block content %}
-<h3 class="text-center text-success font-weight-bold">AMORTIZED BUDGET ESTIMATION </h3>
-<h4 class="font-weight-bold text-center text-secondary ">List the bugdet estimates based on the amount you spent in a given period</h4>
-<h5 class="font-weight-bold text-center text-secondary">Period Given:One month, Three Months, Six Month and one Year </h5>
-    <div>
+<style>
+  .am-hero{
+    background:linear-gradient(135deg,#2d9cdb,#216ca3);
+    color:#fff;
+    padding:1rem;
+    border-radius:8px;
+    text-align:center;
+    margin-bottom:1rem;
+    box-shadow:0 8px 20px rgba(33,108,163,0.08);
+  }
+  .am-hero h3{margin:0;font-weight:700}
+  .am-hero p{margin:.25rem 0 0;color:rgba(255,255,255,.95)}
 
-        <table class="table table-sm">
-            <thead>
-                <th></th>
-               <th>#</th>
-               <th>Budget Item</th>
-               <th>Average</th>
-               <th>Last 1 Month</th>
-               <th>Last 3 Months</th>
-               <th>Last 6 Months</th>
+  .panel{background:#fff;border-radius:8px;padding:.75rem;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+  .controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem}
+  .controls .btn{padding:.35rem .6rem;border-radius:6px;border:1px solid #d6e4f2;background:#f7fbff;color:#1f6fb5;font-weight:700}
+  .controls .btn.primary{background:#3498db;color:#fff;border-color:transparent}
 
-            </thead>
-            <tbody>
-                {% for data in estimates %}
-                <tr id="row_{{data.name}}">
-                    <td><input type="checkbox" id="{{data.name}}"/></td>
-                    <td>{{forloop.counter}}</td>
-                    <td>{{data.name}}</></td>
-                    <td>{{data.average}}</td>
-                    <td>{{data.estimate_1_month}}</td>
-                    <td> {{data.estimate_3_months}}</td>
-                    <td>{{data.estimate_6_months}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+  table.table-sm{font-size:.92rem;margin-bottom:0}
+  table.table-sm thead th{background:#f8fafc;color:#2c3e50;font-weight:700;font-size:.78rem;padding:.5rem .6rem}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  .chk-col{text-align:center;width:48px}
+  .actions-row{display:flex;gap:.4rem;justify-content:center}
 
-        <script>
-             function hideRow(event){
-            	if(event.target.checked){
-            	  var check_id = event.target.getAttribute("id");
-            	  var row_id = "row_"+check_id;
-            	  var rowElem = document.getElementById(row_id);
-            	  rowElem.style.display="none";
-            	}
-            }
-            {% for data in estimates %}
-            document.getElementById("{{data.name}}").addEventListener('click',hideRow);
-            {% endfor %}
+  .btn-ghost{background:transparent;border:1px solid #e6eef8;color:#34495e;padding:.35rem .6rem;border-radius:6px}
+  .muted-small{font-size:.85rem;color:#6b7280}
 
-        </script>
+  @media(max-width:576px){
+    .controls{flex-direction:column;align-items:stretch}
+    .chk-col{width:36px}
+  }
+</style>
 
-    </div>
+<div class="am-hero" role="region" aria-label="Amortized estimates">
+  <h3>Amortized Budget Estimation</h3>
+  <p class="small">Estimates based on historic spend: 1, 3, 6 months averages</p>
+</div>
+
+<div class="panel">
+  <div class="controls">
+    <div class="muted-small">Toggle rows to hide/show or use actions:</div>
+    <button type="button" id="hide_selected" class="btn">Hide Selected</button>
+    <button type="button" id="show_all" class="btn primary">Show All</button>
+    <div style="margin-left:auto" class="muted-small">Items: <strong>{{ estimates|length }}</strong></div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-striped" id="amort_table" aria-describedby="amortized-estimates">
+      <caption id="amortized-estimates" class="sr-only">Amortized budget estimates table</caption>
+      <thead>
+        <tr>
+          <th class="chk-col"><input type="checkbox" id="select_all" aria-label="Select all rows"></th>
+          <th>#</th>
+          <th>Budget Item</th>
+          <th class="text-right">Average</th>
+          <th class="text-right">Last 1 Month</th>
+          <th class="text-right">Last 3 Months</th>
+          <th class="text-right">Last 6 Months</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for data in estimates %}
+        <tr id="row_{{ forloop.counter }}" data-index="{{ forloop.counter }}">
+          <td class="chk-col text-center">
+            <input type="checkbox" class="row-toggle" id="chk_{{ forloop.counter }}" data-row="row_{{ forloop.counter }}" aria-label="Toggle {{ data.name }}">
+          </td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ data.name }}</td>
+          <td class="text-right">{{ data.average }}</td>
+          <td class="text-right">{{ data.estimate_1_month }}</td>
+          <td class="text-right">{{ data.estimate_3_months }}</td>
+          <td class="text-right">{{ data.estimate_6_months }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-2 muted-small">Tip: checking a row and clicking "Hide Selected" will hide those rows. Click "Show All" to restore.</div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const hideBtn = document.getElementById('hide_selected');
+    const showBtn = document.getElementById('show_all');
+    const selectAll = document.getElementById('select_all');
+
+    function getCheckedRows() {
+      return Array.from(document.querySelectorAll('.row-toggle:checked')).map(cb => cb.dataset.row);
+    }
+
+    hideBtn.addEventListener('click', function () {
+      getCheckedRows().forEach(id => {
+        const r = document.getElementById(id);
+        if (r) r.style.display = 'none';
+      });
+    });
+
+    showBtn.addEventListener('click', function () {
+      document.querySelectorAll('#amort_table tbody tr').forEach(r => { r.style.display = ''; });
+      document.querySelectorAll('.row-toggle').forEach(cb => cb.checked = false);
+      if (selectAll) selectAll.checked = false;
+    });
+
+    // each checkbox toggles the row visibility instantly (checked => hide)
+    document.querySelectorAll('.row-toggle').forEach(cb => {
+      cb.addEventListener('change', function (e) {
+        const rowId = e.target.dataset.row;
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        row.style.display = e.target.checked ? 'none' : '';
+      });
+    });
+
+    // select/deselect all checkboxes
+    if (selectAll) {
+      selectAll.addEventListener('change', function (e) {
+        const checked = e.target.checked;
+        document.querySelectorAll('.row-toggle').forEach(cb => cb.checked = checked);
+      });
+    }
+  });
+</script>
 {% endblock content %}

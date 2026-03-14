@@ -1,140 +1,421 @@
 {% load static %}
 <!DOCTYPE html>
-  {% load crispy_forms_tags %}
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{%static 'bootstrap.min.js'%}"></script>
-    <link rel="stylesheet" href="{% static 'spent/main.css' %}"/>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'spent/main.css' %}">
 
-    <title>{% block title %} {% endblock title%}</title>
-    {% block head %} {% endblock head %}
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #27ae60;
+            --danger-color: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 56px;
+        }
+
+        /* Navbar Styling */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 0.5rem 0;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white !important;
+            padding: 0.4rem 0 !important;
+            white-space: nowrap;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            margin: 0 5px;
+            padding: 0.4rem 0.5rem !important;
+            transition: color 0.3s ease;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-custom .dropdown-menu {
+            background-color: #34495e;
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 0.3rem;
+        }
+
+        .navbar-custom .dropdown-item {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-custom .dropdown-item:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            padding-left: 1.6rem;
+        }
+
+        .navbar-custom .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 0.4rem 0;
+        }
+
+        .navbar-custom .dropdown-header {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1.2rem 0.3rem;
+        }
+
+        /* Theme Banner */
+        .theme-banner {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #2ecc71 100%);
+            color: white;
+            padding: 0.8rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+ .theme-banner-old {
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+            color: white;
+            padding: 0.8rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Button Styling */
+        .btn-nav {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-nav:hover {
+            background-color: #229954;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Content */
+        .main-container {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            body {
+                padding-top: 52px;
+            }
+
+            .navbar-custom {
+                padding: 0.4rem 0;
+            }
+
+            .navbar-custom .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .navbar-custom .nav-link {
+                padding: 0.35rem 0.4rem !important;
+                font-size: 0.9rem;
+                margin: 0.2rem 0;
+            }
+
+            .navbar-custom .dropdown-menu {
+                margin-top: 0.2rem;
+            }
+
+            .theme-banner {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+                margin-bottom: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 48px;
+            }
+
+            .navbar-custom {
+                padding: 0.3rem 0;
+            }
+
+            .navbar-custom .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .navbar-custom .nav-link {
+                padding: 0.3rem 0 !important;
+                font-size: 0.85rem;
+            }
+
+            .theme-banner {
+                padding: 0.6rem;
+                font-size: 0.85rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+
+    <title>{% block title %}SavingsApp{% endblock title %}</title>
+    {% block head %}{% endblock head %}
 </head>
-{% block navbar %} {%endblock navbar%}
-<header>
-    <nav class="nav nav-tabs">
-    <a class=" nav-item nav-link" href="/">Home</a>
-    <div class ="dropdown">
-        <a class="nav-item nav-link dropdown-toggle" id="categoryDropDown"
-                    data-toggle="dropdown"            aria-haspopup="true" aria-expanded="false"
-                                href="#">Category</a>
-        <div class="dropdown-menu" aria-labelledby="categoryDropDown">
-            <a class="dropdown-item" href="{% url 'add_category'%}">Add Category</a>
-            <a class="dropdown-item" href="{% url 'category_list'%}">Category List</a>
-        </div>
-    </div>
 
-    <div class="dropdown">
-         <a class="nav-item nav-link dropdown-toggle" data-toggle="dropdown"
-          id="spentDropDown" aria-haspopup="true" aria-expanded="false"   href="#">Spent</a>
-        <div class="dropdown-menu" aria-labelledby="spentDropDown">
-            <a class="dropdown-item" href="{% url 'add_spent'%}">Add Spent</a>
-            <a class="dropdown-item" href="{% url 'daily_list'%}">Daily List</a>
-            <a class="dropdown-item" href="{% url 'weekly_savings'%}">Weekly Savings</a>
-            <a class="dropdown-item" href="{% url 'monthly_list'%}">Monthly List</a>
-            <a class="dropdown-item" href="{% url 'period_graph'%}">Spent Graph</a>
-            <a class="dropdown-item" href="{% url 'weekly_analysis'%}">Weekly Analysis</a>
-            <a class="dropdown-item" href="{% url 'all_spents'%}">All Spent</a>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-piggy-bank"></i> SavingsApp
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        </div>
-    </div>
-    <div class="dropdown">
-         <a class="nav-item nav-link dropdown-toggle"
-            data-toggle="dropdown"
-          id="reportsDropDown" aria-haspopup="true" aria-expanded="false"        href="#Trackings">Tracking</a>
-        <div class="dropdown-menu" aria-labelledby="reportsDropDown">
-            <a class="dropdown-item" href="{% url 'savings_list'%}">Savings List</a>
-            <a class="dropdown-item" href="{%url 'create_track'%}">Create a new Track</a>
-            <a class="dropdown-item" href="{%url 'create_tracking'%}">Generate Trackers</a>
-            <a class="dropdown-item" href="{%url 'create_savings_tracking'%}">Generate Savings Trackers</a>
-            <a class="dropdown-item" href="{%url 'track_list'%}">TrackList</a>
-            <a class="dropdown-item" href="{%url 'tracking_list'%}">BudgetSpentList</a>
-        </div>
-    </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                    </li>
 
-    <div class="dropdown">
-         <a class="nav-item nav-link dropdown-toggle"
-            data-toggle="dropdown"
-          id="reportsDropDown" aria-haspopup="true" aria-expanded="false"        href="#Trackings">Debt Service</a>
-        <div class="dropdown-menu" aria-labelledby="reportsDropDown">
-            <a class="dropdown-item" href="{% url 'debt_registration'%}">Debt Registration</a>
-            <a class="dropdown-item" href="{%url 'debt_service'%}">Debt Service</a>
-            <a class="dropdown-item" href="{%url 'debt_list'%}">Debt History</a>
-            <a class="dropdown-item" href="{%url 'debt_analysis'%}">Debt Analysis</a>
-        </div>
-    </div>
-        <div class="dropdown">
-             <a class="nav-item nav-link dropdown-toggle"
-                data-toggle="dropdown"
-              id="allocate" aria-haspopup="true" aria-expanded="false"        href="#Trackings">Allocation</a>
-            <div class="dropdown-menu" aria-labelledby="allocate">
-                <a class="dropdown-item" href="{% url 'chart_form'%}">Chart Registration</a>
-                <a class="dropdown-item" href="{%url 'chart_list'%}">Chart List</a>
-                <hr/>
-                <a class="dropdown-item" href="{% url 'allocate'%}">Allocate</a>
-                <a class="dropdown-item" href="{%url 'transaction_list'%}">Transaction List</a>
-                <a class="dropdown-item" href="{%url 'chart_report'%}">Chart Report</a>
-                <a class="dropdown-item" href="{%url 'transfer_report'%}">Allocation Transfer Report</a>
-                <hr/>
-                <a class="dropdown-item" href="{%url 'shopping_category_list'%}">Shopping Category List</a>
-                <a class="dropdown-item" href="{%url 'shopping_list'%}">Shopping List</a>
+                    <!-- Category Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags"></i> Category
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                            <li><a class="dropdown-item" href="{% url 'add_category'%}"><i class="fas fa-plus"></i> Add Category</a></li>
+                            <li><a class="dropdown-item" href="{% url 'category_list'%}"><i class="fas fa-list"></i> Category List</a></li>
+                        </ul>
+                    </li>
 
+                    <!-- Spent Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="spentDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shopping-cart"></i> Spent
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="spentDropdown">
+                            <li><a class="dropdown-item" href="{% url 'add_spent'%}"><i class="fas fa-plus-circle"></i> Add Spent</a></li>
+                            <li><a class="dropdown-item" href="{% url 'daily_list'%}"><i class="fas fa-calendar-day"></i> Daily List</a></li>
+                            <li><a class="dropdown-item" href="{% url 'weekly_savings'%}"><i class="fas fa-calendar-week"></i> Weekly Savings</a></li>
+                            <li><a class="dropdown-item" href="{% url 'monthly_list'%}"><i class="fas fa-calendar"></i> Monthly List</a></li>
+                            <li><a class="dropdown-item" href="{% url 'period_graph'%}"><i class="fas fa-chart-bar"></i> Spent Graph</a></li>
+                            <li><a class="dropdown-item" href="{% url 'weekly_analysis'%}"><i class="fas fa-chart-pie"></i> Weekly Analysis</a></li>
+                            <li><a class="dropdown-item" href="{% url 'all_spents'%}"><i class="fas fa-list-ul"></i> All Spent</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Tracking Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="trackingDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-crosshairs"></i> Tracking
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="trackingDropdown">
+                            <li><a class="dropdown-item" href="{% url 'savings_list'%}"><i class="fas fa-list"></i> Savings List</a></li>
+                            <li><a class="dropdown-item" href="{%url 'create_track'%}"><i class="fas fa-plus"></i> Create Track</a></li>
+                            <li><a class="dropdown-item" href="{%url 'create_tracking'%}"><i class="fas fa-tasks"></i> Generate Trackers</a></li>
+                            <li><a class="dropdown-item" href="{%url 'create_savings_tracking'%}"><i class="fas fa-tasks"></i> Savings Trackers</a></li>
+                            <li><a class="dropdown-item" href="{%url 'track_list'%}"><i class="fas fa-list"></i> TrackList</a></li>
+                            <li><a class="dropdown-item" href="{%url 'tracking_list'%}"><i class="fas fa-list"></i> Budget Spent List</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Debt Service Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="debtDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-money-bill-wave"></i> Debt Service
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="debtDropdown">
+                            <li><a class="dropdown-item" href="{% url 'debt_registration'%}"><i class="fas fa-plus-circle"></i> Debt Registration</a></li>
+                            <li><a class="dropdown-item" href="{%url 'debt_service'%}"><i class="fas fa-hands-holding-dollar"></i> Debt Service</a></li>
+                            <li><a class="dropdown-item" href="{%url 'debt_list'%}"><i class="fas fa-history"></i> Debt History</a></li>
+                            <li><a class="dropdown-item" href="{%url 'debt_analysis'%}"><i class="fas fa-chart-line"></i> Debt Analysis</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Allocation Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="allocationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-pie"></i> Allocation
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="allocationDropdown">
+                            <li class="dropdown-header">Chart Management</li>
+                            <li><a class="dropdown-item" href="{% url 'chart_form'%}"><i class="fas fa-plus"></i> Chart Registration</a></li>
+                            <li><a class="dropdown-item" href="{%url 'chart_list'%}"><i class="fas fa-list"></i> Chart List</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header">Allocation</li>
+                            <li><a class="dropdown-item" href="{% url 'allocate'%}"><i class="fas fa-share-alt"></i> Allocate</a></li>
+                            <li><a class="dropdown-item" href="{%url 'transaction_list'%}"><i class="fas fa-exchange-alt"></i> Transaction List</a></li>
+                            <li><a class="dropdown-item" href="{%url 'chart_report'%}"><i class="fas fa-file-alt"></i> Chart Report</a></li>
+                            <li><a class="dropdown-item" href="{%url 'transfer_report'%}"><i class="fas fa-file-alt"></i> Transfer Report</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header">Shopping</li>
+                            <li><a class="dropdown-item" href="{%url 'shopping_category_list'%}"><i class="fas fa-tags"></i> Shopping Categories</a></li>
+                            <li><a class="dropdown-item" href="{%url 'shopping_list'%}"><i class="fas fa-shopping-bag"></i> Shopping List</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Budgets Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="budgetDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-invoice-dollar"></i> Budgets
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="budgetDropdown">
+                            <li class="dropdown-header">Budget Basics</li>
+                            <li><a class="dropdown-item" href="{%url 'add_budget'%}"><i class="fas fa-plus"></i> Create Budget</a></li>
+                            <li><a class="dropdown-item" href="{%url 'budget_list'%}"><i class="fas fa-list"></i> Budget List</a></li>
+                            <li><a class="dropdown-item" href="{%url 'budget_estimate'%}"><i class="fas fa-calculator"></i> Budget Estimate</a></li>
+                            <li><a class="dropdown-item" href="{%url 'amortized'%}"><i class="fas fa-chart-line"></i> Amortized Estimates</a></li>
+                            <li><a class="dropdown-item" href="{%url 'budget_performance' %}"><i class="fas fa-tachometer-alt"></i> Budget Performance</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header">Budget Categories</li>
+                            <li><a class="dropdown-item" href="{% url 'add_budget_category'%}"><i class="fas fa-plus"></i> Create Category</a></li>
+                            <li><a class="dropdown-item" href="{%url 'budget_category_list'%}"><i class="fas fa-list"></i> Category List</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header">Budget Items</li>
+                            <li><a class="dropdown-item" href="{%url 'add_class_item'%}"><i class="fas fa-plus"></i> Class Item</a></li>
+                            <li><a class="dropdown-item" href="{%url 'class_item_list'%}"><i class="fas fa-list"></i> Class Item List</a></li>
+                            <li><a class="dropdown-item" href="{%url 'add_budget_item'%}"><i class="fas fa-plus"></i> Budget Item</a></li>
+                            <li><a class="dropdown-item" href="{%url 'budget_item_list' %}"><i class="fas fa-list"></i> Item List</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Planner Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="plannerDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tasks"></i> Planner
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="plannerDropdown">
+                            <li><a class="dropdown-item" href="{% url 'task_create'%}"><i class="fas fa-plus-circle"></i> Create Task</a></li>
+                            <li><a class="dropdown-item" href="{% url 'task_list'%}"><i class="fas fa-list"></i> Task List</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'pending_tasks'%}"><i class="fas fa-clock"></i> Pending Tasks</a></li>
+                            <li><a class="dropdown-item" href="{% url 'tawala'%}"><i class="fas fa-flask"></i> Test</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Banking App Button -->
+                    <li class="nav-item">
+                        <a href="{% url 'BankingApp:dashboard' %}" class="nav-link btn-nav">
+                            <i class="fas fa-university"></i> Banking App
+                        </a>
+                    </li>
+
+                    <!-- Logout -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout'%}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="dropdown">
-         <a class="nav-item nav-link dropdown-toggle"
-            data-toggle="dropdown"
-          id="budget" aria-haspopup="true" aria-expanded="false"        href="#Trackings">Budgets</a>
-        <div class="dropdown-menu" aria-labelledby="budget">
+    </nav>
 
-            <a class="dropdown-item" href="{%url 'add_budget'%}">Create Budget</a>
-            <a class="dropdown-item" href="{%url 'budget_list'%}">Budget List</a>
-            <a class="dropdown-item" href="{%url 'budget_estimate'%}">Budget Estimate</a>
-            <a class="dropdown-item" href="{%url 'amortized'%}">Amortized Estimates</a>
-            <a class="dropdown-item" href="{%url 'budget_performance' %}">Budget Performance</a>
-            <hr/>
-            <a class="dropdown-item" href="{% url 'add_budget_category'%}">Create Budget Category</a>
-            <a class="dropdown-item" href="{%url 'budget_category_list'%}">Budget Category List</a>
-
-            <hr/>
-            <a class="dropdown-item" href="{%url 'add_class_item'%}">Create Class Item</a>
-            <a class="dropdown-item" href="{%url 'class_item_list'%}">Budget Class Item List</a>
-            <a class="dropdown-item" href="{%url 'add_budget_item'%}">Create Budget Item</a>
-            <a class="dropdown-item" href="{%url 'budget_item_list' %}">Budget Item List</a>
+    <!-- Theme Banner -->
+    <div class="container-fluid">
+        <div class="theme-banner-old">
+            <i class="fas fa-lightbulb"></i> 2025 Theme: Give without a sense of reward <em>(People Like You - Gramps Morgan)</em>
         </div>
 
-    </div>
-        <div class="dropdown">
-         <a class="nav-item nav-link dropdown-toggle" data-toggle="dropdown"
-          id="plannerDropDown" aria-haspopup="true" aria-expanded="false"   href="#">Planner</a>
-        <div class="dropdown-menu" aria-labelledby="plannerDropDown">
-            <a class="dropdown-item" href="{% url 'task_create'%}">Create Task</a>
-            <a class="dropdown-item" href="{% url 'task_list'%}">Task List</a>
-            <hr/>
-            <a class="dropdown-item" href="{% url 'pending_tasks'%}">Pending Task</a>
-            <a class="dropdown-item" href="{% url 'tawala'%}">Test tawala</a>
-
+<div class="theme-banner">
+            <i class="fas fa-lightbulb"></i> 2026 Theme: Intelligence is knowing how to get what you want from life without violating the rights of others</em>
         </div>
     </div>
-        <a href="{% url 'BankingApp:dashboard' %}" class="btn btn-secondary" >BankingApp</a>
-        <a class="nav-item nav-link ml-auto" href="{% url 'logout'%}">Logout</a>
 
-</nav>
-</header>
+    <!-- Main Content -->
+    <main class="container-lg main-container">
+        {% block content %}{% endblock content %}
+    </main>
 
+    <!-- Footer -->
+    <footer>
+        <p class="mb-0">&copy; 2025 SavingsApp. All rights reserved.</p>
+    </footer>
 
-<body class="container-fluid">
-
-<p class="alert alert-success text-center ">2025 Theme: Give without a sense of reward (People Like You - Gramps Morgan)</p>
-
-{%block content %}
-
-{%endblock content %}
-
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

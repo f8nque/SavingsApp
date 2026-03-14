@@ -1,72 +1,553 @@
 {% extends "base.html" %}
- {% load crispy_forms_tags %}
 {% block title %} Spent | Add Spent {% endblock title%}
 
 {% block content %}
-<h1 class="text-center text-primary font-weight-bold">SPENDING PAGE</h1>
-<hr/>
-<form action="{% url 'add_spent'%}" method="post">
-    {% csrf_token %}
-	<div class="form-group">
-	    {% if form.date.errors %}
-		    <div class="alert alert-danger">{{form.date.errors}}</div>
-		{% endif %}
-		<label for="{{form.date.id_for_label}}" class="form-control-label"> Date of Spent<span class="asteriskField">*</span> </label>
-		<input class="form-control" type ="date" id="{{form.date.id_for_label}}" name="{{form.date.html_name}}" value=""/>
-	</div>
 
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        background: white;
+        padding: 2.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
 
-	<div class="form-group">
-		 {% if form.category_id.errors %}
-		    <div class="alert alert-danger">{{form.category_id.errors}}</div>
-		{% endif %}
-		<label for="category_id" class="form-control-label">Spent Category<span class="asteriskField">*</span> </label>
-		{{form.category_id}}
-		<!--<input class="form-control" type ="text" id="credit_agency" name="reg_date" value=""/> -->
-	</div>
+    .form-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px 10px 0 0;
+        margin: -2.5rem -2.5rem 2rem -2.5rem;
+        text-align: center;
+    }
 
+    .form-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
 
+    .form-header p {
+        margin-top: 0.5rem;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
 
-	<div class="form-group">
-		 {% if form.amount.errors %}
-		    <div class="alert alert-danger">{{form.amount.errors}}</div>
-		{% endif %}
-		<label for="amount" class="form-control-label"> Amount Spent<span class="asteriskField">*</span></label>
-		{{form.amount}}
-	<!--	<input class="form-control" type ="number" id="amount" name="amount" value=""/> -->
-	</div>
+    /* Form Group Styling */
+    .form-group {
+        margin-bottom: 1.8rem;
+    }
 
-	<div class="form-group">
-		 {% if form.comment.errors %}
-		    <div class="alert alert-danger">{{form.comment.errors}}</div>
-		{% endif %}
-		<label for="comment" class="form-control-label"> Reason</span></label>
-		{{form.comment}}
-	<!--	<input class="form-control" type ="number" id="amount" name="amount" value=""/> -->
-	</div>
-    <button type="submit" class="btn btn-primary mt-3">Submit</button>
-</form>
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.7rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-group label i {
+        margin-right: 0.5rem;
+        color: #3498db;
+    }
+
+    .asteriskField {
+        color: #3498db;
+        margin-left: 0.3rem;
+        font-weight: bold;
+    }
+
+    .form-control,
+    .form-select,
+    textarea {
+        border: 2px solid #ecf0f1;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    textarea:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .form-control::placeholder,
+    textarea::placeholder {
+        color: #95a5a6;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Date Input Styling */
+    input[type="date"] {
+        cursor: pointer;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        background-color: #3498db;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+    /* Select Dropdown Styling */
+    select.form-control,
+    select.form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233498db' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    select.form-control::-webkit-scrollbar,
+    select.form-select::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    select.form-control::-webkit-scrollbar-track,
+    select.form-select::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    select.form-control::-webkit-scrollbar-thumb,
+    select.form-select::-webkit-scrollbar-thumb {
+        background: #3498db;
+        border-radius: 4px;
+    }
+
+    /* Error Alert */
+    .alert-danger {
+        background-color: #d6eaf8;
+        border: 2px solid #3498db;
+        color: #1a5276;
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 0.7rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-danger i {
+        font-size: 1rem;
+        color: #3498db;
+    }
+
+    /* Button Styling */
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .btn-submit {
+        flex: 1;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 0.95rem 2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        background-color: #95a5a6;
+        color: white;
+        border: none;
+        padding: 0.95rem 2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background-color: #7f8c8d;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+
+    /* Info Banner */
+    .info-banner {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .info-banner i {
+        font-size: 1.5rem;
+    }
+
+    .info-banner p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Tablet Responsive Design */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .form-header {
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            padding: 1.5rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+        }
+
+        .form-control,
+        .form-select,
+        textarea {
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+        }
+
+        .button-group {
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+        }
+
+        .info-banner {
+            padding: 1.2rem;
+            gap: 0.8rem;
+        }
+
+        .info-banner i {
+            font-size: 1.2rem;
+        }
+
+        .info-banner p {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Mobile Responsive Design */
+    @media (max-width: 480px) {
+        .form-container {
+            margin: 1rem 0.5rem;
+            padding: 1.2rem;
+            border-radius: 8px;
+        }
+
+        .form-header {
+            margin: -1.2rem -1.2rem 1.2rem -1.2rem;
+            padding: 1.2rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.3rem;
+            gap: 0.5rem;
+        }
+
+        .form-header h1 i {
+            font-size: 1.5rem;
+        }
+
+        .form-header p {
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select,
+        textarea {
+            padding: 0.9rem 0.8rem;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            padding: 3px;
+        }
+
+        select.form-control,
+        select.form-select {
+            padding-right: 2rem;
+        }
+
+        .button-group {
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+            gap: 0.3rem;
+        }
+
+        .btn-submit i,
+        .btn-cancel i {
+            font-size: 0.85rem;
+        }
+
+        .info-banner {
+            padding: 1rem;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-banner i {
+            font-size: 1rem;
+            min-width: 1rem;
+        }
+
+        .info-banner p {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .alert-danger {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+            gap: 0.4rem;
+        }
+
+        .alert-danger i {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Extra Small Devices */
+    @media (max-width: 360px) {
+        .form-container {
+            margin: 0.5rem;
+            padding: 1rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.1rem;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            font-size: 0.85rem;
+            padding: 0.7rem 0.8rem;
+        }
+    }
+</style>
+
+<!-- Info Banner -->
+<div class="info-banner">
+    <i class="fas fa-shopping-cart"></i>
+    <p><strong>Track your spending</strong> by recording each expense with the date, category, and amount.</p>
+</div>
+
+<!-- Form Container -->
+<div class="form-container">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h1>
+            <i class="fas fa-plus-circle"></i> Add Spending Record
+        </h1>
+        <p>Record a new expense</p>
+    </div>
+
+    <!-- Form -->
+    <form action="{% url 'add_spent'%}" method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Date and Category Row -->
+        <div class="form-row">
+            <!-- Date Field -->
+            <div class="form-group">
+                {% if form.date.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>{{ form.date.errors }}</div>
+                    </div>
+                {% endif %}
+                <label for="{{ form.date.id_for_label }}" class="form-label">
+                    <i class="fas fa-calendar"></i> Date
+                    <span class="asteriskField">*</span>
+                </label>
+                <input 
+                    class="form-control" 
+                    type="date" 
+                    id="{{ form.date.id_for_label }}" 
+                    name="{{ form.date.html_name }}" 
+                    value=""
+                    required
+                />
+            </div>
+
+            <!-- Category Field -->
+            <div class="form-group">
+                {% if form.category_id.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>{{ form.category_id.errors }}</div>
+                    </div>
+                {% endif %}
+                <label for="{{ form.category_id.id_for_label }}" class="form-label">
+                    <i class="fas fa-tag"></i> Category
+                    <span class="asteriskField">*</span>
+                </label>
+                {{ form.category_id }}
+            </div>
+        </div>
+
+        <!-- Amount Field -->
+        <div class="form-group">
+            {% if form.amount.errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>{{ form.amount.errors }}</div>
+                </div>
+            {% endif %}
+            <label for="{{ form.amount.id_for_label }}" class="form-label">
+                <i class="fas fa-money-bill-wave"></i> Amount Spent
+                <span class="asteriskField">*</span>
+            </label>
+            {{ form.amount }}
+        </div>
+
+        <!-- Comment/Reason Field -->
+        <div class="form-group">
+            {% if form.comment.errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>{{ form.comment.errors }}</div>
+                </div>
+            {% endif %}
+            <label for="{{ form.comment.id_for_label }}" class="form-label">
+                <i class="fas fa-comment"></i> Reason / Notes
+            </label>
+            {{ form.comment }}
+        </div>
+
+        <!-- Button Group -->
+        <div class="button-group">
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> Save Spending
+            </button>
+            <a href="{% url 'daily_list' %}" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
 <script>
+    // Auto-fill today's date
     let dateElement = document.getElementById("id_date");
     const d = new Date();
     let day = d.getDate();
     let month = d.getMonth() + 1;
     let year = d.getFullYear();
     let date = "";
-    if(month <10){
-       if(day < 10){
-          date +=year+"-0"+month+"-0"+day;
-       }else{
-          date +=year+"-0"+month+"-"+day;
-       }
-    }else{
-    	if(day < 10){
-        	date +=year+"-"+month+"-0"+day;
-        }else{
-        	date +=year+"-"+month+"-"+day;
+    
+    if(month < 10){
+        if(day < 10){
+            date += year + "-0" + month + "-0" + day;
+        } else {
+            date += year + "-0" + month + "-" + day;
+        }
+    } else {
+        if(day < 10){
+            date += year + "-" + month + "-0" + day;
+        } else {
+            date += year + "-" + month + "-" + day;
         }
     }
-    dateElement.setAttribute("value",date);
+    
+    dateElement.setAttribute("value", date);
 </script>
 
 {% endblock content %}

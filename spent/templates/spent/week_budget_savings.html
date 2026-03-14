@@ -1,181 +1,743 @@
 {% extends "base.html" %}
-{%block title %} Savings | Weekly Budget Savings{% endblock title %}
+{% block title %} Savings | Weekly Budget Savings {% endblock title %}
 
 {% block content %}
 
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
 
-<h1 class="text-center text-primary">Spent Week Budget</h1>
-<div>
-      <form action="#" method="post">
-        {% csrf_token %}
-                <div class="form-group">
-                    <label for="week">Select: Budget Week</label>
-                    <select class="form-control" id="week" name="week_select">
-                      {% for week in filter_list %}
-                        <option value="{{week.budget_id_id}}:{{week.week_start}}:{{week.week_end}}">{{week.budget_id_id}}-{{week.week_start}}<--->{{week.week_end}}</option>
-                      {% endfor %}
+    .page-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
 
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .filter-section form {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group label i {
+        margin-right: 0.5rem;
+        color: #3498db;
+    }
+
+    .form-control,
+    .form-select {
+        border: 2px solid #ecf0f1;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .stat-content h3 {
+        margin: 0 0 0.3rem 0;
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-content p {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #3498db;
+    }
+
+    /* Table Container */
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Table Styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    table thead {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    table thead th {
+        padding: 1rem;
+        text-align: left;
+        border: none;
+        white-space: nowrap;
+    }
+
+    table tbody tr {
+        border-bottom: 1px solid #ecf0f1;
+        transition: all 0.3s ease;
+    }
+
+    table tbody tr:hover {
+        background-color: #f8f9fa;
+        box-shadow: inset 0 0 5px rgba(52, 152, 219, 0.1);
+    }
+
+    table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        color: #2c3e50;
+        font-size: 0.9rem;
+    }
+
+    table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Amount Styling */
+    .amount {
+        font-weight: 600;
+        color: #3498db;
+    }
+
+    .amount-positive {
+        color: #27ae60;
+    }
+
+    .amount-negative {
+        color: #e74c3c;
+    }
+
+    /* Badge Styling */
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .badge-locked {
+        background-color: #fadbd8;
+        color: #c0392b;
+    }
+
+    .badge-action {
+        background-color: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .badge-action:hover {
+        background-color: #a9dfbf;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 6px rgba(39, 174, 96, 0.2);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #bdc3c7;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .modal-header .modal-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #ecf0f1;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .modal-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-form-group label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .modal-form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #ecf0f1;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .modal-form-group input:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .modal-form-group input[readonly] {
+        background-color: #f8f9fa;
+        color: #7f8c8d;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .filter-section {
+            padding: 1.2rem;
+        }
+
+        .filter-section form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+        .btn-submit {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        table thead th {
+            padding: 0.8rem;
+            font-size: 0.7rem;
+        }
+
+        table tbody td {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.2rem;
+            gap: 0.5rem;
+        }
+
+        .page-header h1 i {
+            font-size: 1.5rem;
+        }
+
+        .filter-section {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        table thead th {
+            padding: 0.6rem;
+            font-size: 0.65rem;
+        }
+
+        table tbody td {
+            padding: 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .stat-card {
+            padding: 1.2rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .stat-content p {
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1>
+        <i class="fas fa-chart-bar"></i> Weekly Budget Savings
+    </h1>
+    <p>Track and manage your weekly budget allocations and savings</p>
 </div>
 
-    <table class="table table-sm">
-      <thead class="table-head">
-        <tr>
-            <th></th>
-          <th>Budget</th>
-          <th>Category</th>
-          <th>Week Start</th>
-          <th>Week End</th>
-          <th>Budget Amount</th>
-          <th>Spent Start</th>
-          <th>Week Budget</th>
-          <th>Week Spent</th>
-          <th>Def/Sup</th>
-          <th>Amt BF</th>
-          <th>Amt Saved</th>
-          <th>Budget Saved</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody class="table-body">
-      {% for obj in weekly_savings %}
-        <tr>
-          <td>{{obj.id}}</td>
-          <td>{{obj.budget_name}}</td>
-          <td>{{obj.budget_category}}</td>
-          <td>{{obj.week_start}}</td>
-          <td>{{obj.week_end}}</td>
-          <td>{{obj.budget_amount}}</td>
-          <td>{{obj.budget_spent_start}}</td>
-          <td>{{obj.week_budget}}</td>
-          <td>{{obj.week_spent}}</td>
-          <td>{{obj.week_remaining}}</td>
-          <td>{{obj.amount_bf}}</td>
-          <td>{{obj.amount_saved}}</td>
-          <td>{{obj.budget_saved}}</td>
-          {% if obj.locked %}
-          <td>
-              <span class="badge badge-danger">Locked</span>
-          </td>
-          {% else %}
-            <td><span class="badge badge-pill badge-success btnAction" data-toggle="modal" data-target="#weekBudgetModal">Action</span></td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal fade" id="weekBudgetModal" tabindex="-1" role="dialog" aria-labelledby="weekBudgetModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="weekBudgetModalLabel">Transfer Form</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+<!-- Filter Section -->
+<div class="filter-section">
+    <form action="#" method="post" id="filterForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="week">
+                <i class="fas fa-calendar-week"></i> Select Budget Week
+            </label>
+            <select class="form-control" id="week" name="week_select">
+                {% for week in filter_list %}
+                    <option value="{{ week.budget_id_id }}:{{ week.week_start }}:{{ week.week_end }}">
+                        {{ week.budget_id_id }} - {{ week.week_start }} to {{ week.week_end }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
-        <div class="modal-body">
-          <form id="weekBudgetForm" action="{%url 'update_week_surplus' %}" method="post">
-              {% csrf_token %}
-              <input type="hidden" id= "week_cat_id" name="week_cat"/>
-            <div class="form-group">
-              <label for="weekStart">Week Start :</label>
-            </div>
-            <div class="form-group">
-              <label for="weekEnd">Week End: </label>
-            </div>
-            <div class="form-group">
-              <label for="category">Category :</label>
-            </div>
-            <div class="form-group">
-              <label for="weekRemaining">Week Remaining:</label>
-              <input type="hidden" id="week_remaining_id" />
-            </div>
-            <div class="form-group">
-              <label for="previousSaved">Previous Saved:</label>
-              <input type="hidden" id="previous_saved_id" />
-            </div>
-            <div class="form-group">
-              <label for="budget_saved">Total Budget Saved:</label>
-              <input type="hidden" id="budget_saved" />
-            </div>
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+</div>
 
-            <div class="form-group">
-              <label for="amountSaved">Amount Saved</label>
-              <input type="number" class="form-control" id="amountSaved" name="amountSaved" onChange="calculateAmountBF()">
-            </div>
-            <div class="form-group">
-              <label for="amountBf">Amount Brought Forward</label>
-              <input type="number" class="form-control" id="amountBf" name="amountBf" readonly>
-
-            </div>
-
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary" >Post</button>
-          </form>
+<!-- Stats Cards -->
+<div class="stats-container">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-list"></i>
         </div>
-        <div class="modal-footer">
-
+        <div class="stat-content">
+            <h3>Total Records</h3>
+            <p>{{ weekly_savings|length }}</p>
         </div>
-      </div>
     </div>
-  </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-piggy-bank"></i>
+        </div>
+        <div class="stat-content">
+            <h3>Total Saved</h3>
+            <p id="totalSaved">0</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-content">
+            <h3>Total Spent</h3>
+            <p id="totalSpent">0</p>
+        </div>
+    </div>
+</div>
 
-  <script>
+<!-- Table Container -->
+<div class="table-container">
+    {% if weekly_savings %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Budget</th>
+                        <th>Category</th>
+                        <th>Week Start</th>
+                        <th>Week End</th>
+                        <th>Budget Amount</th>
+                        <th>Week Budget</th>
+                        <th>Week Spent</th>
+                        <th>Remaining</th>
+                        <th>Amount Saved</th>
+                        <th>Total Saved</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in weekly_savings %}
+                        <tr>
+                            <td><strong>{{ forloop.counter }}</strong></td>
+                            <td>{{ obj.budget_name }}</td>
+                            <td>{{ obj.budget_category }}</td>
+                            <td>{{ obj.week_start|date:"M d" }}</td>
+                            <td>{{ obj.week_end|date:"M d" }}</td>
+                            <td class="amount">{{ obj.budget_amount }}</td>
+                            <td class="amount">{{ obj.week_budget }}</td>
+                            <td class="amount amount-negative">{{ obj.week_spent }}</td>
+                            <td class="amount {% if obj.week_remaining > 0 %}amount-positive{% else %}amount-negative{% endif %}">
+                                {{ obj.week_remaining }}
+                            </td>
+                            <td class="amount amount-positive">{{ obj.amount_saved }}</td>
+                            <td class="amount amount-positive">{{ obj.budget_saved }}</td>
+                            <td>
+                                {% if obj.locked %}
+                                    <span class="badge badge-locked">
+                                        <i class="fas fa-lock"></i> Locked
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-action btnAction" data-toggle="modal" data-target="#weekBudgetModal" data-row="{{ forloop.counter0 }}">
+                                        <i class="fas fa-edit"></i> Action
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p><strong>No data found</strong></p>
+            <p>Select a budget week from the filter above to view savings details</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="weekBudgetModal" tabindex="-1" role="dialog" aria-labelledby="weekBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="weekBudgetModalLabel">
+                    <i class="fas fa-exchange-alt"></i> Update Weekly Savings
+                </h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="weekBudgetForm" action="{% url 'update_week_surplus' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="week_cat_id" name="week_cat" />
+
+                    <div class="modal-form-group">
+                        <label for="weekStart">Week Start</label>
+                        <input type="text" class="form-control" id="weekStart" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="weekEnd">Week End</label>
+                        <input type="text" class="form-control" id="weekEnd" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="category">Category</label>
+                        <input type="text" class="form-control" id="category" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="weekRemaining">Week Remaining</label>
+                        <input type="number" class="form-control" id="weekRemaining" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="previousSaved">Previous Saved</label>
+                        <input type="number" class="form-control" id="previousSaved" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="budgetSaved">Total Budget Saved</label>
+                        <input type="number" class="form-control" id="budgetSaved" readonly />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="amountSaved">
+                            <i class="fas fa-piggy-bank"></i> Amount Saved
+                        </label>
+                        <input type="number" class="form-control" id="amountSaved" name="amountSaved" placeholder="Enter amount" onChange="calculateAmountBF()" required />
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="amountBf">Amount Brought Forward</label>
+                        <input type="number" class="form-control" id="amountBf" name="amountBf" readonly />
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
     document.addEventListener("DOMContentLoaded", function () {
-    const actionButtons = document.querySelectorAll(".btnAction"); //get all buttons
-    actionButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        // Get the parent row of the clicked button
-        const row = this.closest("tr");
+        const actionButtons = document.querySelectorAll(".btnAction");
+        
+        actionButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+                const row = this.closest("tr");
+                const cells = row.children;
 
-        // Extract values from the row
-        const id = row.children[0].textContent.trim();
-        const category = row.children[2].textContent.trim();
-        const weekStart = row.children[3].textContent.trim();
-        const weekEnd = row.children[4].textContent.trim();
-        const weekRemaining = row.children[9].textContent.trim();
-        const previousSaved = row.children[11].textContent.trim() || "0"; // Default to 0 if None
-        const amountSaved = row.children[11].textContent.trim() || "0"; // Default to 0 if None
-        const budgetSaved = row.children[12].textContent.trim() || "0"; // Default to 0 if None
-        const previousSavedFinal = (previousSaved === "None" || previousSaved === "" || isNaN(previousSaved)) ? "0" : amountSaved;
-        const TotalSavedFinal = (budgetSaved === "None" || budgetSaved === "" || isNaN(budgetSaved)) ? "0" : budgetSaved;
+                const id = cells[0].textContent.trim();
+                const category = cells[2].textContent.trim();
+                const weekStart = cells[3].textContent.trim();
+                const weekEnd = cells[4].textContent.trim();
+                const weekRemaining = parseFloat(cells[8].textContent.trim()) || 0;
+                const amountSaved = parseFloat(cells[9].textContent.trim()) || 0;
+                const budgetSaved = parseFloat(cells[10].textContent.trim()) || 0;
 
-        // Populate modal fields
-        document.getElementById("week_cat_id").value = id;
-        document.getElementById("week_remaining_id").value = weekRemaining-previousSavedFinal;
-        document.getElementById("previous_saved_id").value = previousSaved;
-        document.getElementById("budget_saved").value = TotalSavedFinal;
-        document.querySelector("#weekBudgetModal label[for='previousSaved']").textContent = `Previous Saved: ${previousSaved}`;
-        document.querySelector("#weekBudgetModal label[for='category']").textContent = `Category: ${category}`;
-        document.querySelector("#weekBudgetModal label[for='weekStart']").textContent = `Week Start: ${weekStart}`;
-        document.querySelector("#weekBudgetModal label[for='weekEnd']").textContent = `Week End: ${weekEnd}`;
-        document.querySelector("#weekBudgetModal label[for='weekRemaining']").textContent = `Week Remaining: ${weekRemaining-previousSavedFinal}`;
-        document.querySelector("#weekBudgetModal input#amountSaved").value = amountSaved;
-      });
+                document.getElementById("week_cat_id").value = id;
+                document.getElementById("weekStart").value = weekStart;
+                document.getElementById("weekEnd").value = weekEnd;
+                document.getElementById("category").value = category;
+                document.getElementById("weekRemaining").value = weekRemaining;
+                document.getElementById("previousSaved").value = amountSaved;
+                document.getElementById("budgetSaved").value = budgetSaved;
+                document.getElementById("amountSaved").value = amountSaved;
+                calculateAmountBF();
+            });
+        });
+
+        // Calculate totals
+        calculateStats();
     });
-  });
-
 
     function calculateAmountBF() {
-      const weekRemaining = parseFloat(document.getElementById('week_remaining_id').value) || 0;
-      const amountSaved = parseFloat(document.getElementById('amountSaved').value) || 0;
-      const previousSavedAmount =parseFloat(document.getElementById('previous_saved_id').value) || 0;
-      const amountBf = weekRemaining - amountSaved;
+        const weekRemaining = parseFloat(document.getElementById('weekRemaining').value) || 0;
+        const amountSaved = parseFloat(document.getElementById('amountSaved').value) || 0;
+        const amountBf = weekRemaining - amountSaved;
 
-      if(amountSaved < 0){
-      document.getElementById('amountBf').value = 0;
-      document.getElementById('amountSaved').value = 0;
-      }else{
-          document.getElementById('amountBf').value = amountBf < 0 ? 0: amountBf;
-        document.getElementById('amountSaved').value = amountBf < 0 ? 0 : amountSaved;
-      }
+        if (amountSaved < 0) {
+            document.getElementById('amountBf').value = 0;
+            document.getElementById('amountSaved').value = 0;
+        } else {
+            document.getElementById('amountBf').value = amountBf < 0 ? 0 : amountBf;
+            document.getElementById('amountSaved').value = amountBf < 0 ? 0 : amountSaved;
+        }
     }
-  </script>
+
+    function calculateStats() {
+        const table = document.querySelector('table tbody');
+        if (!table) return;
+
+        let totalSaved = 0;
+        let totalSpent = 0;
+
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+            const savedCell = row.children[9];
+            const spentCell = row.children[7];
+            
+            if (savedCell) totalSaved += parseFloat(savedCell.textContent) || 0;
+            if (spentCell) totalSpent += parseFloat(spentCell.textContent) || 0;
+        });
+
+        document.getElementById('totalSaved').textContent = totalSaved.toFixed(2);
+        document.getElementById('totalSpent').textContent = Math.abs(totalSpent).toFixed(2);
+    }
+</script>
 
 {% endblock content %}
