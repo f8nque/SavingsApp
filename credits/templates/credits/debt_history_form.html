@@ -2,40 +2,140 @@
 {%block title %} Credit | Debt History{% endblock title %}
 
 {% block content %}
-<h3 class="text-success font-weight-bold">DEBT HISTORY FOR {{debt.credit_agency}}</h3>
-<div class="mx-0 text-secondary font-weight-bold">
-	<ul>
-		<li>DEBT DATE <span class="badge badge-pill badge-primary">{{debt.credit_date}}</span></li>
-		<li>DEBT SERVICE DATE <span class="badge badge-pill badge-secondary">{{debt.credit_service_date}}</span></li>
-		<li>AMOUNT BORROWED <span class="badge badge-pill badge-danger"> {{debt.amount}}</span></li>
-		<li>AMOUNT PAID <span class="badge badge-pill badge-success">{{debt.amount_paid}}</span></li>
-		<li>AMOUNT REMAINING <span class="badge badge-pill badge-danger">{{debt.amount_remaining}}</span></li>
-		<li>PAYMENT STATUS <span class="badge badge-pill badge-primary">{{debt.paying_status}}</span></li>
-		<li>DEBT STATUS <span class="badge badge-pill badge-secondary">{{debt.service_status}}</span></li>
-	</ul>
-</div>
-<hr/>
-<div>
-<p>Debt Service History</p>
-<table class="table table-responsive">
-<tr class="table-head">
-	<th>No</th>
-	<th>Service Date</th>
-	<th>Amount</th>
-	<th>Comment</th>
-</tr>
+<style>
+  .dh-hero {
+    background: linear-gradient(135deg,#2d9cdb,#216ca3);
+    color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 16px rgba(33,108,163,0.08);
+  }
+  .dh-hero h3 {margin:0;font-weight:700}
+  .dh-meta {margin: .75rem 0 1rem; display:flex; gap: .5rem; flex-wrap:wrap}
+  .dh-meta .badge {font-weight:700}
 
-{% for dat in data %}
-<tr>
-<td>{{forloop.counter}}</td>
-<td>{{dat.service_date}}</td>
-<td>{{dat.amount}}</td>
-<td>{{dat.comment}}</td>
-<td><a href="{% url 'update_debt_service' dat.id %}" class="badge badge-pill badge-primary">update</a></td>
-<td><a href="{%url 'delete_debt_service' dat.id %}"  class="badge badge-pill badge-danger">delete</a></td>
-</tr>
-{% endfor %}
-</table>
+  .panel {background:#fff;border-radius:8px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:1rem}
+  .summary-list {list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.5rem}
+  .summary-list li{background:#f8f9fa;padding:.6rem;border-radius:6px;border-left:4px solid #3498db;display:flex;justify-content:space-between;align-items:center}
+
+  table.table-sm {font-size:.9rem}
+  table.table-sm th, table.table-sm td {padding:.45rem .6rem;vertical-align:middle}
+  table.table-sm thead th {background:#f1f5f9;color:#2c3e50;font-weight:700;text-transform:uppercase;font-size:.72rem}
+  .actions .badge {display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .5rem}
+  .empty {text-align:center;color:#7f8c8d;padding:1rem}
+
+  @media (max-width:576px){
+    .dh-meta {flex-direction:column;align-items:flex-start}
+    .summary-list {grid-template-columns:1fr}
+  }
+</style>
+
+<style>
+  /* ensure action badges are visible */
+  .actions .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .6rem;
+    color: #fff !important;
+    text-decoration: none;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    border-radius: .35rem;
+  }
+
+  /* explicit backgrounds so they aren't overridden */
+  .actions .badge-primary { background-color: #3498db !important; color: #fff !important; }
+  .actions .badge-danger  { background-color: #e74c3c !important; color: #fff !important; }
+  .actions .badge-success { background-color: #27ae60 !important; color: #fff !important; }
+
+  /* make icons inherit the badge color */
+  .actions .badge i { color: #fff !important; font-size: .9rem; }
+
+  /* guard against disabled/ghost styles from other rules */
+  .actions .badge[disabled], .actions .badge.disabled {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+</style>
+
+<div class="dh-hero">
+  <h3 class="mb-1"><i class="fas fa-history"></i> Debt History — {{ debt.credit_agency }}</h3>
+  <div class="small">Detailed service history and summary for the selected debt</div>
 </div>
 
+<div class="panel">
+  <ul class="summary-list">
+    <li><span>Debt Date</span><strong class="text-primary">{{ debt.credit_date }}</strong></li>
+    <li><span>Service Date</span><strong class="text-secondary">{{ debt.credit_service_date }}</strong></li>
+    <li><span>Amount Borrowed</span><strong class="text-danger">{{ debt.amount }}</strong></li>
+    <li><span>Amount Paid</span><strong class="text-success">{{ debt.amount_paid }}</strong></li>
+    <li><span>Amount Remaining</span><strong class="text-danger">{{ debt.amount_remaining }}</strong></li>
+    <li><span>Payment Status</span><strong class="text-primary">{{ debt.paying_status }}</strong></li>
+    <li><span>Debt Status</span><strong class="text-secondary">{{ debt.service_status }}</strong></li>
+  </ul>
+</div>
+
+<div class="panel">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0"><i class="fas fa-receipt"></i> Debt Service History</h5>
+    <div>
+      <a href="{% url 'debt_service' %}" class="btn btn-sm btn-outline-primary mr-1" title="Edit debt"><i class="fas fa-edit"></i></a>
+      <a href="{% url 'debt_list' %}" class="btn btn-sm btn-outline-secondary" title="Back to list"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+  </div>
+
+  {% if data %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped mb-0">
+        <thead>
+          <tr>
+            <th class="text-center">#</th>
+            <th>Service Date</th>
+            <th class="text-right">Amount</th>
+            <th>Comment</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dat in data %}
+            <tr>
+              <td class="text-center">{{ forloop.counter }}</td>
+              <td>{{ dat.service_date }}</td>
+              <td class="text-right">{{ dat.amount }}</td>
+              <td>{{ dat.comment|default:"—" }}</td>
+              <td class="text-center actions">
+                <a href="{% url 'update_debt_service' dat.id %}" class="badge badge-pill badge-primary" title="Update">
+                  <i class="fas fa-edit" aria-hidden="true"></i> Update
+                </a>
+                <a href="{% url 'delete_debt_service' dat.id %}" class="badge badge-pill badge-danger" title="Delete">
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      <i class="fas fa-inbox fa-2x mb-2" style="color:#bdc3c7"></i>
+      <div><strong>No service records found</strong></div>
+      <div class="small text-muted">Add a service entry to start tracking payments.</div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // optional: highlight fully paid rows
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('table.table-sm tbody tr').forEach(function(r){
+      const amtCell = r.querySelector('td:nth-child(3)');
+      if(!amtCell) return;
+      const v = parseFloat(amtCell.textContent || 0);
+      if(v <= 0) r.classList.add('table-success');
+    });
+  });
+</script>
 {% endblock content %}

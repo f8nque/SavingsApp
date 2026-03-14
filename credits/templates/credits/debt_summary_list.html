@@ -1,54 +1,141 @@
 {% extends "base.html" %}
-{%block title %} Credit | Debt Summary{% endblock title %}
+{% block title %} Credit | Debt Summary{% endblock title %}
 
 {% block content %}
+<style>
+  .page-hero{
+    background:linear-gradient(135deg,#2d9cdb,#216ca3);
+    color:#fff;
+    padding:1.25rem;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 6px 18px rgba(33,108,163,0.08);
+    margin-bottom:1rem;
+  }
+  .controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+  .controls .form-control{max-width:220px}
+  .summary-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+  .summary-card{background:#fff;border-radius:8px;padding:.75rem 1rem;flex:1;min-width:200px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .summary-card h5{margin:0;font-size:.8rem;color:#6b7280;text-transform:uppercase;letter-spacing:.4px}
+  .summary-card .val{font-weight:700;font-size:1.25rem;color:#1f6fb5;margin-top:.25rem}
 
-<h3 class="text-center text-success font-weight-bold">{{help_text}} DEBT SUMMARY LIST</h3>
-<h4 class="text-center">Total Debt Owed <span class="badge badge-pill badge-danger">{{debt}}</span></h4>
+  /* compact table-sm style */
+  .table-sm {font-size:.85rem}
 
-	<div>
-	<form action="" method="post">
-		{% csrf_token %}
-		<select name="select" >
-			<option value="">ALL </option>
-			<option value="PENDING">Debt Not Paid</option>
-			<option value="SETTLED">Debt Settled</option>
-		</select>
-		<button type="submit" class="btn btn-outline-primary mx-3">Select Category</button>
-	</form>
-	</div>
+  /* Action badges: ensure icons are visible and clickable */
+  .actions .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .6rem;
+    color: #fff !important;
+    text-decoration: none;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    border-radius: .35rem;
+  }
+  .actions .badge i { font-size: .9rem; line-height: 1; }
+  .actions .badge-primary { background: #3498db; }
+  .actions .badge-danger  { background: #e74c3c; }
+  .actions .badge-success { background: #27ae60; }
+  .actions .badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+  }
 
-<table class="table table-responsive">
-<tr class="table-head">
-	<th>No</th>
-	<th>Credit Date</th>
-	<th>Credit Agency</th>
-	<th>Amount</th>
-	<th>Debt Service Date</th>
-	<th>Amount Paid</th>
-	<th>Comment</th>
-	<th>Paying Status</th>
-	<th>Service Status</th>
+  .empty-state{padding:1.5rem;text-align:center;color:#7f8c8d;background:#fff;border-radius:8px}
+  @media(max-width:576px){.controls{flex-direction:column;align-items:stretch}}
+</style>
 
-</tr>
-
-{% for dat in data %}
-<tr>
-<td>{{forloop.counter}}</td>
-<td>{{dat.credit_date}}</td>
-<td>{{dat.credit_agency}}</td>
-<td>{{dat.amount}}</td>
-<td>{{dat.credit_service_date}}</td>
-<td>{{dat.amount_paid}}</td>
-<td>{{dat.comment}}</td>
-<td {% if dat.paying_status == 'Overdue'%} class="font-weight-bold text-danger" {%endif%}>{{dat.paying_status}}</td>
-<td {% if dat.service_status == 'Fully Paid'%} class="font-weight-bold text-success" {%endif%} >{{dat.service_status}}</td>
-<td><a href="{% url 'update_debt_registration' dat.id %}" class="badge badge-pill badge-primary">update</a></td>
-<td><a href="{%url 'delete_debt_registration' dat.id %}" class="badge badge-pill badge-danger">delete</a></td>
-<td><a href="{% url 'debt_history' dat.id %}"  class="badge badge-success">history</a></td>
-</tr>
-{% endfor %}
-</table>
+<div class="page-hero">
+  <h3 class="mb-1">{{ help_text }} DEBT SUMMARY LIST</h3>
+  <div class="small">Summary of debts, payments and statuses</div>
 </div>
 
+<div class="summary-row mb-3">
+  <div class="summary-card">
+    <h5>Total Debt Owed</h5>
+    <div class="val"><span class="badge badge-pill badge-danger">{{ debt }}</span></div>
+  </div>
+  <div class="summary-card">
+    <h5>Total Records</h5>
+    <div class="val">{{ data|length }}</div>
+  </div>
+  <div class="summary-card">
+    <h5>Filtered</h5>
+    <div class="val">{% if selected %}{{ selected }}{% else %}All{% endif %}</div>
+  </div>
+</div>
+
+<div class="panel mb-3 p-3" style="background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+  <form method="post" class="controls" action="">
+    {% csrf_token %}
+    <select name="select" class="form-control form-control-sm">
+      <option value="" {% if not selected %}selected{% endif %}>ALL</option>
+      <option value="PENDING" {% if selected == "PENDING" %}selected{% endif %}>Debt Not Paid</option>
+      <option value="SETTLED" {% if selected == "SETTLED" %}selected{% endif %}>Debt Settled</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
+
+    <div class="ml-auto d-flex align-items-center">
+      <a href="{% url 'debt_registration' %}" class="btn btn-sm btn-primary mr-2">New Debt</a>
+      <span class="text-muted small">Showing: <strong>{% if selected %}{{ selected }}{% else %}All{% endif %}</strong></span>
+    </div>
+  </form>
+</div>
+
+<div class="panel p-0" style="background:transparent">
+  {% if data %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped mb-0">
+        <thead>
+          <tr>
+            <th class="text-center">#</th>
+            <th>Credit Date</th>
+            <th>Credit Agency</th>
+            <th class="text-right">Amount</th>
+            <th>Debt Service Date</th>
+            <th class="text-right">Amount Paid</th>
+            <th>Comment</th>
+            <th>Paying Status</th>
+            <th>Service Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dat in data %}
+            <tr>
+              <td class="text-center">{{ forloop.counter }}</td>
+              <td>{{ dat.credit_date }}</td>
+              <td>{{ dat.credit_agency }}</td>
+              <td class="text-right">{{ dat.amount }}</td>
+              <td>{{ dat.credit_service_date }}</td>
+              <td class="text-right">{{ dat.amount_paid }}</td>
+              <td>{{ dat.comment|default:"—" }}</td>
+              <td class="{% if dat.paying_status == 'Overdue' %}font-weight-bold text-danger{% endif %}">{{ dat.paying_status }}</td>
+              <td class="{% if dat.service_status == 'Fully Paid' %}font-weight-bold text-success{% endif %}">{{ dat.service_status }}</td>
+              <td class="text-center actions">
+                <a href="{% url 'update_debt_registration' dat.id %}" class="badge badge-pill badge-primary" title="Update">
+                  <i class="fas fa-edit" aria-hidden="true"></i>&nbsp;Update
+                </a>
+                <a href="{% url 'delete_debt_registration' dat.id %}" class="badge badge-pill badge-danger" title="Delete">
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i>&nbsp;Delete
+                </a>
+                <a href="{% url 'debt_history' dat.id %}" class="badge badge-pill badge-success" title="History">
+                  <i class="fas fa-history" aria-hidden="true"></i>&nbsp;History
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-inbox fa-2x mb-2" style="color:#bdc3c7"></i>
+      <p class="mb-1"><strong>No debt records found</strong></p>
+      <p class="small text-muted">Create a new debt entry to get started.</p>
+    </div>
+  {% endif %}
+</div>
 {% endblock content %}

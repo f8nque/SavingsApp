@@ -1,44 +1,120 @@
 {% extends "base.html" %}
-{% block title %} Category | CategoryRegistration {%endblock title %}
+{% block title %} Category | Budget Class Item {%endblock title %}
 
 {%block content %}
-<h1 class="text-center text-primary font-weight-bold">BUDGET CLASS ITEM FORM</h1>
-<hr/>
-<div class="container-fluid px-1 py-5 mx-auto">
-    <div class="row d-flex justify-content-center">
-        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
-            <h3>CREATE BUDGET CLASS ITEM</h3>
-            <p class="blue-text">Adds a new Budget class Item <br> to capture constant budget items.</p>
-            <div class="card m-0 p-0">
-                {% if error %}
-                    <div class="alert alert-danger">
-                        {{error }}
-                    </div>
-                {% endif %}
-                <h5 class="text-center mb-4">Budget Class Item Form</h5>
-                <form class="form-card" action="" method="post">
-                    {% csrf_token %}
-                    <div class="justify-content-between text-left">
-                        <div class="form-group flex-column d-flex">
-                        	<label class="form-control-label px-3" for="{{form.name.id_for_label}}">
-                        		Name of the Individual Item in the Budget<span class="text-danger"> *</span>
-                        	</label>
-                        	{{form.name}} </div>
-                     <div class="form-group flex-column d-flex">
-                        <label class="form-control-label px-3" for="{{form.description.id_for_label}}">
-                        Budget Major Category
-                        <span class="text-danger"> *</span></label>
-                          {{form.budget_category}}
-                        </div>
-                    </div>
+<style>
+  .bci-hero{
+    background:linear-gradient(135deg,#3498db,#2980b9);
+    color:#fff;
+    padding:1.25rem;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(41,128,185,0.08);
+    margin-bottom:1rem;
+  }
+  .bci-hero h1{margin:0;font-weight:800;font-size:1.6rem}
+  .bci-hero p{margin:.35rem 0 0;opacity:.95;font-size:.95rem}
 
+  .form-card{
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:8px;
+    padding:1.5rem;
+    box-shadow:0 2px 12px rgba(0,0,0,0.04);
+  }
+  .form-card h2{font-size:1.25rem;font-weight:700;margin-bottom:1rem;color:#2c3e50}
 
-                    <div class=" justify-content-end">
-                        <div class="form-group"> <button type="submit" class="btn-block btn-primary ">Create Class Item</button> </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+  .form-group{margin-bottom:1rem;display:flex;flex-direction:column}
+  .form-label{font-weight:700;color:#2c3e50;font-size:.95rem;margin-bottom:.35rem;display:block}
+  .help-text{font-size:.85rem;color:#6b7280;margin-top:.25rem}
+
+  input.form-control, select.form-control, textarea.form-control{
+    border:1px solid #e9eef5;
+    border-radius:6px;
+    padding:.6rem .75rem;
+    font-size:.95rem;
+    transition:box-shadow .15s, border-color .15s;
+  }
+  input.form-control:focus, select.form-control:focus, textarea.form-control:focus{
+    outline:none;
+    border-color:#3498db;
+    box-shadow:0 6px 18px rgba(52,152,219,0.08);
+  }
+
+  .btn-row{display:flex;gap:.5rem;align-items:center;margin-top:1rem}
+  .btn-primary{background:#3498db;border:none;color:#fff;padding:.6rem 1rem;border-radius:6px;font-weight:600;cursor:pointer;width:100%}
+  .btn-primary:hover{background:#2980b9}
+  .btn-secondary{background:transparent;border:1px solid #d1d8e0;color:#34495e;padding:.55rem .9rem;border-radius:6px}
+
+  .field-errors{margin-bottom:.75rem}
+  .field-errors .alert{margin:0;padding:.5rem .75rem;font-size:.92rem;border-radius:6px}
+
+  @media(max-width:576px){
+    .form-card{padding:1rem}
+    .btn-row{flex-direction:column}
+  }
+</style>
+
+<div class="bci-hero">
+  <h1><i class="fas fa-plus-circle" aria-hidden="true"></i> Create Budget Class Item</h1>
+  <p>Add a new budget class item to capture constant budget allocations</p>
 </div>
+
+<div class="form-card">
+  <h2 id="form-title">Budget Class Item Form</h2>
+
+  {% if error %}
+    <div class="field-errors">
+      <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>&nbsp;{{ error }}
+      </div>
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate aria-labelledby="form-title">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.name.id_for_label }}">
+        Item Name <span style="color:#e74c3c">*</span>
+      </label>
+      {{ form.name }}
+      {% if form.name.errors %}
+        <div class="field-errors"><div class="alert alert-danger">{{ form.name.errors|striptags }}</div></div>
+      {% endif %}
+      <div class="help-text">Name of the individual budget item (e.g., Rent, Insurance, Groceries).</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.budget_category.id_for_label }}">
+        Budget Category <span style="color:#e74c3c">*</span>
+      </label>
+      {{ form.budget_category }}
+      {% if form.budget_category.errors %}
+        <div class="field-errors"><div class="alert alert-danger">{{ form.budget_category.errors|striptags }}</div></div>
+      {% endif %}
+      <div class="help-text">Select the budget category this item belongs to.</div>
+    </div>
+
+    <div class="btn-row">
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>&nbsp;Create Class Item
+      </button>
+    </div>
+
+    <div style="margin-top:.75rem;text-align:center">
+      <a href="{% url 'budget_list' %}" class="btn-secondary" style="display:inline-block;padding:.45rem .8rem;">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>&nbsp;Back
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded',function(){
+    const name = document.getElementById("{{ form.name.id_for_label }}");
+    if(name) name.focus();
+  });
+</script>
 {% endblock content %}

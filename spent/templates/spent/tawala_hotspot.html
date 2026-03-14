@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tawala Internet Hotspot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-sans antialiased text-gray-900 bg-gray-900">
+    <!-- Header -->
+    <div class="mx-auto max-w-screen-2xl px-4 md:px-4">
+        <div class="max-h-34 relative mx-auto mt-4 flex max-w-lg flex-1 shrink-0 items-center justify-center overflow-hidden shadow-lg rounded-lg bg-green-100">
+            <!-- Header content -->
+            <div class="relative flex flex-col items-center p-4 sm:max-w-xl">
+                <p class="mb-4 text-center text-2xl font-bold text-gray-800 sm:text-xl md:mb-2">Tawala Internet Hotspot</p>
+                <h3 class="text-lg italic text-gray-700 mb-2">How to Purchase:</h3>
+                <ol class="text-base text-left text-gray-800 mb-1 list-decimal pl-6">
+                    <li>Click on your preferred package</li>
+                    <li>Enter your M-Pesa number</li>
+                    <li>Enter PIN when prompted</li>
+                    <li>Wait for confirmation to get connected</li>
+                </ol>
+                <p class="mb-4 text-center text-lg font-medium text-gray-700 sm:text-1xl md:mb-1 md:text-xl">CUSTOMER CARE: <a href="tel:+254700000000" class="text-blue-600">+254 700 000 000</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Button Section -->
+    <div class="py-2 sm:py-4 lg:py-4">
+        <div class="mx-auto max-w-screen-2xl px-4 md:px-4">
+            <div class="mx-auto max-w-lg">
+                <div class="flex flex-col gap-4">
+                    $(if trial == 'yes')
+                    <a href="$(link-login-only)?dst=$(link-orig-esc)&amp;username=T-$(mac-esc)" class="flex items-center justify-center gap-2 rounded-lg bg-yellow-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-yellow-300 transition duration-100 hover:bg-yellow-600 focus-visible:ring active:bg-yellow-700 md:text-base">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        FREE TRIAL - 10 MINUTES
+                    </a>
+                    $(endif)
+                    <div class="flex flex-row gap-2">
+                        <button id="redeemVoucher" type="button" class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 text-center text-sm font-semibold text-white outline-none ring-green-300 transition duration-100 hover:bg-green-600 focus-visible:ring active:bg-green-700 md:text-base">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                            </svg>
+                            Redeem Voucher
+                        </button>
+                        <button id="checkActivations" type="button" class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 text-center text-sm font-semibold text-white outline-none ring-blue-300 transition duration-100 hover:bg-blue-600 focus-visible:ring active:bg-blue-700 md:text-base">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            My Subscriptions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Packages Section -->
+    <div class="py-2 sm:py-4 lg:py-6">
+        <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+            <div class="mx-auto max-w-lg grid grid-cols-2 sm:grid-cols-3 gap-3 p-1" id="packages-container">
+                <!-- Packages will be populated here by JavaScript -->
+                <div class="loading-spinner flex justify-center items-center col-span-full py-8">
+                    <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="container mx-auto px-4 mb-4">
+        <div class="max-w-md mx-auto bg-white rounded-lg overflow-hidden md:max-w-lg">
+            <div class="md:flex">
+                <div class="w-full p-5">
+                    <div class="text-center">
+                        <h3 class="text-2xl text-gray-900">Already Have an Active Package?</h3>
+                        <p class="text-gray-600 mt-2">Connect with your existing account</p>
+                    </div>
+                    <form id="loginForm" class="form" name="login" action="$(link-login-only)" method="post" $(if chap-id)onSubmit="return doLogin()" $(endif)>
+                        <input type="hidden" name="dst" value="$(link-orig)" />
+                        <input type="hidden" name="popup" value="true" />
+                        <div class="text-center mt-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="username">Enter your account number or username</label>
+                            <div>
+                                <input id="usernameInput" name="username" type="text" value="" placeholder="e.g ACC123456" class="w-full rounded-lg border bg-gray-50 px-3 py-2 text-gray-800 outline-none ring-indigo-300 transition duration-100 focus:ring" />
+                                <button id="submitBtn" class="w-full mt-3 flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-blue-300 transition duration-100 hover:bg-blue-600 focus-visible:ring active:bg-blue-700 md:text-base" type="submit">
+                                    Connect
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="password" value="1234">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+        <div class="mx-auto mb-4 max-w-lg">
+            <div class="border-t py-4">
+                <p class="text-xs text-center text-white font-bold">&copy; 2025 Tawala Internet. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+    <!-- M-Pesa Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load packages from PHPNuxBill
+            fetchPackages();
+
+            // Setup voucher redemption
+            document.getElementById('redeemVoucher').addEventListener('click', redeemVoucher);
+
+            // Setup check activations
+            document.getElementById('checkActivations').addEventListener('click', checkActivations);
+
+            // Check for existing account ID
+            var accountId = getCookie('accountId');
+            if (accountId) {
+                document.getElementById('usernameInput').value = accountId;
+            }
+        });
+
+        function fetchPackages() {
+            // Replace with your actual PHPNuxBill API endpoint
+            fetch('https://tawala.io/hotspot/index.php?_route=plugin/hotspot_plan', {
+                method: 'POST',
+                headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ routername: "Mikrotik1" })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayPackages(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching packages:', error);
+                    document.querySelector('.loading-spinner').innerHTML =
+                        '<div class="text-white text-center">Failed to load packages. Please refresh the page.</div>';
+                });
+        }
+
+        function displayPackages(data) {
+            const container = document.getElementById('packages-container');
+            container.innerHTML = ''; // Clear loading spinner
+
+            data.data.forEach(plan => {
+                    const packageCard = document.createElement('div');
+                    packageCard.className = 'bg-white border rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg flex flex-col';
+                    packageCard.innerHTML = `
+                        <div class="bg-green-500 text-white w-full py-1">
+                            <h2 class="text-sm font-medium uppercase text-center">${plan.planname}</h2>
+                        </div>
+                        <div class="px-4 py-2 flex-grow">
+                            <p class="text-2xl font-bold text-green-600 mb-1">
+                                <span class="text-lg font-medium text-black">${plan.currency}</span>
+                                ${plan.price}
+                            </p>
+                            <p class="text-sm text-black mb-2">
+                                Valid for ${plan.validity} ${plan.timelimit}
+                            </p>
+                            <hr class="border-gray-200 mb-2">
+                        </div>
+                        <div class="px-4 py-2 flex-shrink-0">
+                            <button class="inline-block bg-gray-900 text-white hover:bg-blue-600 font-semibold py-1 px-4 rounded-lg transition duration-300 text-md"
+                                onclick="initiateMpesaPayment('${plan.planId}', '${plan.routerId}', '${plan.price}')">
+                                    Buy
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(packageCard);
+                });
+
+            // If no packages were found
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="text-white text-center col-span-full">No packages available at this time.</div>';
+            }
+        }
+
+        function initiateMpesaPayment(planId, routerId, price) {
+            Swal.fire({
+                title: 'Enter Your M-Pesa Number',
+                input: 'tel',
+                inputPlaceholder: '07xxxxxxxx or 254xxxxxxxxx',
+                inputAttributes: {
+                    required: 'true'
+                },
+                inputValidator: function(value) {
+                    if (!value) {
+                        return 'You need to enter your phone number!';
+                    }
+                },
+                text: `You are about to pay KSh ${price}. Enter your phone number and click Pay Now.`,
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Pay Now',
+                showLoaderOnConfirm: true,
+                preConfirm: (phoneNumber) => {
+                    const formattedPhone = formatPhoneNumber(phoneNumber);
+                    const accountId = generateAccountId();
+                    setCookie('accountId', accountId, 1); // Store for 1 day
+                    document.getElementById('usernameInput').value = accountId;
+
+                    return fetch('https://tawala.io/hotspot/index.php?_route=plugin/create_mpesa_payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone_number: formattedPhone,
+                            plan_id: planId,
+                            router_id: routerId,
+                            account_id: accountId,
+                            mac: "$(mac)",
+                            ip: "$(ip)",
+                            hostname: "$(hostname)"
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            throw new Error(data.message);
+                        }
+                        return { data, phoneNumber: formattedPhone, accountId };
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Payment Request Sent',
+                        html: `<p>A payment request has been sent to your phone ${result.value.phoneNumber}.</p>
+                               <p>Please check your phone and enter M-Pesa PIN to complete the payment.</p>`,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            checkPaymentStatus(result.value.accountId);
+                        }
+                    });
+                }
+            }).catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Failed',
+                    text: error.message || 'There was an error processing your payment. Please try again.'
+                });
+            });
+        }
+
+        function checkPaymentStatus(accountId) {
+            let checkInterval = setInterval(() => {
+                fetch('https://tawala.io/hotspot/index.php?_route=plugin/check_payment_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        account_id: accountId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        clearInterval(checkInterval);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful',
+                            text: 'You will be connected automatically in a moment.',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+
+                        // Submit login form automatically
+                        setTimeout(() => {
+                            const submitBtn = document.getElementById('submitBtn');
+                            if(submitBtn){
+                                const clickEvent = new MouseEvent('click',{
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window
+                                });
+                                submitBtn.dispatchEvent(clickEvent);
+                            }else{
+                                document.getElementById('loginForm').submit();
+                            }
+                        }, 3500);
+                    } else if (data.status === 'pending') {
+                        // Continue checking
+                    } else if (data.status === 'failed') {
+                        clearInterval(checkInterval);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: data.message || 'Your payment could not be processed. Please try again.'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking payment status:', error);
+                });
+            }, 5000); // Check every 5 seconds
+
+            // Stop checking after 2 minutes (payment timeout)
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Payment Timeout',
+                    text: 'The payment process took too long. Please try again.'
+                });
+            }, 120000);
+        }
+
+        function checkActivations() {
+            Swal.fire({
+                title: 'Check Your Subscriptions',
+                input: 'tel',
+                inputPlaceholder: 'Enter Your Phone Number',
+                inputLabel: 'Phone Number',
+                inputAttributes: {
+                    required: 'true'
+                },
+                inputValidator: function(value) {
+                    if (!value) {
+                        return 'Phone number is required!';
+                    }
+                },
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Check',
+                showLoaderOnConfirm: true,
+                preConfirm: (phoneNumber) => {
+                    const formattedPhone = formatPhoneNumber(phoneNumber);
+
+                    return fetch('https://tawala.io/hotspot/index.php?_route=plugin/check_subscriptions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone_number: formattedPhone
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            throw new Error(data.message);
+                        }
+                        return { data, phoneNumber: formattedPhone };
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value.data.status === 'success') {
+                    const subscriptions = result.value.data.data;
+
+                    // Create HTML for subscriptions list
+                    let subscriptionsHtml = '<div class="text-left">';
+                    subscriptionsHtml += '<p class="text-lg font-bold mb-2">Your active subscriptions:</p>';
+                    subscriptionsHtml += '<div class="overflow-auto max-h-60">';
+
+                    subscriptions.forEach((sub, index) => {
+                        subscriptionsHtml += `
+                            <div class="p-2 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'} rounded mb-2 subscription-item"
+                                 data-username="${sub.username}" data-id="${sub.id}">
+                                <p class="font-bold">${sub.plan_name}</p>
+                                <p class="text-sm">${sub.time_remaining}</p>
+                                <p class="text-xs text-gray-500">Expires: ${new Date(sub.expiry_date).toLocaleString()}</p>
+                                <button class="use-subscription mt-1 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                                        onclick="useSubscription('${sub.username}')">
+                                    Use This Package
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                    subscriptionsHtml += '</div></div>';
+
+                    Swal.fire({
+                        title: 'Your Active Subscriptions',
+                        html: subscriptionsHtml,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Close',
+                        width: '90%',
+                        maxWidth: '500px'
+                    });
+                }
+            }).catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Check Failed',
+                    text: error.message || 'There was an error checking your subscriptions.'
+                });
+            });
+        }
+
+        function useSubscription(username) {
+            // Set the username in the login form
+            document.getElementById('usernameInput').value = username;
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Package Selected',
+                text: 'You will be connected in a moment.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+
+            // Submit the login form after a short delay
+            setTimeout(() => {
+                if (typeof doLogin === 'function') {
+                    doLogin();
+                } else {
+                    document.getElementById('loginForm').submit();
+                }
+            }, 2000);
+        }
+
+        function redeemVoucher() {
+            Swal.fire({
+                title: 'Redeem Voucher',
+                input: 'text',
+                inputPlaceholder: 'Enter Voucher Code',
+                inputValidator: function(value) {
+                    if (!value) {
+                        return 'You need to enter a voucher code!';
+                    }
+                },
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Redeem',
+                showLoaderOnConfirm: true,
+                preConfirm: (voucher_code) => {
+                    // Set the voucher code as username
+                    document.getElementById('usernameInput').value = voucher_code;
+
+                    return Promise.resolve();
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Voucher Applied',
+                        text: 'You will be connected automatically in a moment.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+
+                    setTimeout(() => {
+                        document.getElementById('loginForm').submit();
+                    }, 2000);
+                }
+            });
+        }
+
+        // Helper functions
+        function formatPhoneNumber(phoneNumber) {
+            // Remove any non-digit characters
+            phoneNumber = phoneNumber.replace(/\D/g, '');
+
+            // If starts with 0, replace with 254
+            if (phoneNumber.startsWith('0')) {
+                phoneNumber = '254' + phoneNumber.substring(1);
+            }
+
+            // If number is 9 digits (without country code), add 254
+            if (phoneNumber.length === 9) {
+                phoneNumber = '254' + phoneNumber;
+            }
+
+            return phoneNumber;
+        }
+
+        function generateAccountId() {
+            // Generate a random account ID using timestamp and random number
+            return 'ACC' + Math.floor(Date.now() / 1000).toString().slice(-6) +
+                   Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        }
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "; expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+    </script>
+
+    <!-- CHAP Authentication -->
+    $(if chap-id)
+    <form name="sendin" action="$(link-login-only)" method="post">
+        <input type="hidden" name="username" />
+        <input type="hidden" name="password" />
+        <input type="hidden" name="dst" value="$(link-orig)" />
+        <input type="hidden" name="popup" value="true" />
+    </form>
+    <script src="md5.js"></script>
+    <script>
+        function doLogin() {
+            console.log("About to do a a login for CHAP");
+            document.sendin.username.value = document.login.username.value;
+            document.sendin.password.value = hexMD5('$(chap-id)' + document.login.password.value + '$(chap-challenge)');
+            document.sendin.submit();
+            return false;
+        }
+    </script>
+    $(endif)
+</body>
+</html>

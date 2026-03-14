@@ -2,112 +2,632 @@
 {% block title %} Budget | Individual Budget {%endblock title %}
 
 {%block content %}
-<div class="container-fluid px-1 py-5 mx-auto">
-	<div class="text-center">
-            <h2 class="h2 text-primary font-weight-bold">{{budgetdata.name}}</h2>
-            <p class="h3 blue-text">{{budgetdata.description}}</p>
 
-            <ul class="list-unstyled d-flex flex-column">
-            	<li class="h4">Track Date from <span class="badge badge-primary">{{budgetdata.start_date}} </span> To <span class="badge badge-primary">{{budgetdata.end_date}}</span></li>
-            	<li class="h4">Available Amount: <span class="badge badge-danger">{{budgetdata.track_amount}}</span></li>
-            	<li class="h4">Budget Amount: <span class="badge badge-success">{{budgetdata.budget_total}}</span><span class="badge badge-secondary">Budget offset: {{budgetdata.budget_diff}}</span></li>
-            	<li class="h4">Budget Spent: <span class="badge badge-secondary">{{budgetdata.total_spent}}</span></li>
-            	<li class="h4">Remaining Budget: <span class="badge badge-secondary">{{budgetdata.remaining_budget}}
-            	<span class="badge badge-primary ">+{{pos_variance}}</span>
-            	<span class="badge badge-danger">-{{neg_variance}}</span>
-            	</span>
-            	</li>
-            	<li class="h4">Burn Rate: <span class="badge badge-danger">{{burn_rate}}%</span></li>
-            	<li class="h4">Budget Completion: <span class="badge badge-success">{{budget_completion}}%</span></li>
-				<li class="h4">Budget Status: <span {% if budgetdata.budget_status == "on budget" %} class="badge badge-success" {%else%} class="badge badge-danger" {%endif%}>{{budgetdata.budget_status}}</span></li>
+<style>
+    /* Page Header */
+    .budget-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
 
-            </ul>
-				<div class="m-0 p-0">
-				<table class="table table-sm table-hover">
-				  <tbody>
-                  {% for group in groupdata %}
-				  	<tr>
-					  <th scope="col" class="text-left text-white h5 bg-secondary" colspan="3">{{group.category}}
-					  <span class="badge badge-primary">budget%: {{group.budget_perc}}%</span>
-						 <span {% if group.spent_perc > 100 %} class="badge badge-danger"
-							 {%else  %} class="badge badge-success" {%endif %}>(spent%:  {{group.spent_perc}}%)</span> </th>
+    .budget-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+        font-size: 2rem;
+    }
 
-					  <th scope="col" class="text-left text-white  h5 bg-secondary">Budget Amount <span class="badge badge-primary">{{group.budget_total}}</span></th>
-					  <th scope="col" class="text-left text-white h5 bg-secondary">Budget Spent <span class="badge badge-success">{{group.spent_total}}</span></th>
-					  <th scope="col" class="text-left text-white h5 bg-secondary">Remaining Amount <span class="badge badge-danger">{{group.remaining_total}}</span></th>
-					</tr>
+    .budget-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
 
-					<tr>
-					  <th scope="row">No</th>
-					  <th scope="row">Category</th>
-					  <th scope="row">Budget Amount</th>
-					  <th scope="row">Amount Spent</th>
-					  <th scope="row">Amount Remaining</th>
-					  <th scope="row">Budget Status</th>
-					</tr>
-                  {% for data in datalist %}
-                    {% if data.category == group.category %}
-					<tr>
-					  <th scope="row"><input type="checkbox" id="{{data.name}}"/> <span id="{{data.name}}_counter">{{forloop.counter}}</span> </th>
-					  <td>{{data.name}} <span class="badge badge-primary">budget%: {{data.budget_perc}}%</span>
-						 <span {% if data.spent_perc > 100 %} class="badge badge-danger"
-							 {%else  %} class="badge badge-secondary" {%endif %}>(spent%:  {{data.spent_perc}}%)</span> </td>
-					  <td>{{data.amount}}</td>
-					  <td>{{data.budget_spent}}</td>
-					  <td>{{data.remaining_budget}} | [W:{{data.weighted}}]</td>
-					  <td><span {% if data.budget_status == "on budget" %} class="badge badge-success" {%else %} class="badge badge-danger" {% endif %}>
-                      {{data.budget_status}}</span></td>
-					</tr>
-					{% for log in log_data %}
-					    {% if data.id == log.budgetitem_id %}
-					        <tr class="{{data.name}}_log" style="display:none;">
-					            <td class="text-center text-secondary">{{forloop.counter}}</td>
-					            <td class="text-center text-secondary">{{data.name}}</td>
-					            <td class="text-center text-secondary">{{log.log_date}}</td>
-					            <td class="text-center text-secondary">{{log.amount}}</td>
-					            <td colspan="2" class="text-center text-secondary">{{log.comment}} </td>
-					        </tr>
-					    {% endif %}
-					{% endfor %}
-                  {% endif %}
-                  {% endfor %}
+    /* Container */
+    .budget-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
 
-                  {% endfor %}
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
 
-				  </tbody>
-				</table>
-				</div> <!-- end card div -->
-            </div> <!-- end format div -->
-      </div> <!-- end container fluid -->
-      <script>
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
 
-        function hideRow(event){
-            	if(event.target.checked){
-            	  var check_id = event.target.getAttribute("id");
-            	  var rows_class = check_id+"_log";
-            	  const rowElems = document.getElementsByClassName(rows_class);
+    .stat-card h4 {
+        margin: 0 0 0.5rem 0;
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .stat-value.primary {
+        color: #3498db;
+    }
+
+    .stat-value.danger {
+        color: #e74c3c;
+    }
+
+    .stat-value.success {
+        color: #27ae60;
+    }
+
+    .stat-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .stat-badge.badge-primary {
+        background: #d4e9f7;
+        color: #2980b9;
+    }
+
+    .stat-badge.badge-danger {
+        background: #fadbd8;
+        color: #c0392b;
+    }
+
+    .stat-badge.badge-success {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
+
+    /* Summary Section */
+    .summary-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .summary-section h3 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .summary-section h3 i {
+        color: #3498db;
+    }
+
+    .summary-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .summary-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid #3498db;
+    }
+
+    .summary-item label {
+        display: block;
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-item-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Category Sections */
+    .category-section {
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .category-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .category-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .category-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .category-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.3rem 0.7rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    /* Table Container */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Bootstrap Table Overrides for table-sm */
+    .table-sm {
+        margin-bottom: 0;
+    }
+
+    .table-sm thead th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+        border: 1px solid #ecf0f1;
+        padding: 0.6rem 0.8rem;
+        vertical-align: middle;
+    }
+
+    .table-sm tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .table-sm tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .table-sm tbody td {
+        color: #2c3e50;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+        vertical-align: middle;
+        border: 1px solid #ecf0f1;
+    }
+
+    .table-sm tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Table Badges */
+    .table-badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+
+    .badge-primary-light {
+        background: #d4e9f7;
+        color: #2980b9;
+    }
+
+    .badge-danger-light {
+        background: #fadbd8;
+        color: #c0392b;
+    }
+
+    .badge-success-light {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .badge-secondary-light {
+        background: #e8eaed;
+        color: #5f6368;
+    }
+
+    /* Checkbox Styling */
+    .checkbox-col {
+        text-align: center;
+        padding: 0.5rem 0.5rem !important;
+    }
+
+    .checkbox-col input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #3498db;
+    }
+
+    .row-number {
+        font-weight: 600;
+        color: #3498db;
+    }
+
+    .row-number.has-logs {
+        color: #27ae60;
+    }
+
+    /* Log Rows */
+    .log-row {
+        background: #f8f9fa;
+        font-size: 0.75rem;
+    }
+
+    .log-row td {
+        color: #7f8c8d;
+        padding: 0.4rem 0.8rem !important;
+        border: 1px solid #ecf0f1;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #bdc3c7;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 0.95rem;
+        margin: 0.3rem 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .budget-header {
+            padding: 1.5rem;
+        }
+
+        .budget-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+        }
+
+        .summary-list {
+            grid-template-columns: 1fr;
+        }
+
+        .category-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-sm thead th {
+            padding: 0.5rem;
+            font-size: 0.65rem;
+        }
+
+        .table-sm tbody td {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .budget-header {
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .budget-header p {
+            font-size: 0.85rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 0.6rem;
+        }
+
+        .stat-card {
+            padding: 0.9rem;
+        }
+
+        .stat-card h4 {
+            font-size: 0.7rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+        }
+
+        .summary-item {
+            padding: 0.8rem;
+            border-left-width: 3px;
+        }
+
+        .summary-item label {
+            font-size: 0.7rem;
+        }
+
+        .summary-item-value {
+            font-size: 1rem;
+        }
+
+        .category-header {
+            padding: 0.8rem;
+        }
+
+        .category-title {
+            font-size: 0.9rem;
+        }
+
+        .category-badges {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .category-badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.6rem;
+        }
+
+        .table-sm thead th {
+            padding: 0.4rem;
+            font-size: 0.6rem;
+        }
+
+        .table-sm tbody td {
+            padding: 0.35rem 0.4rem;
+            font-size: 0.7rem;
+        }
+
+        .checkbox-col input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .table-badge {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.5rem;
+        }
+    }
+</style>
+
+<div class="budget-container">
+    <!-- Page Header -->
+    <div class="budget-header">
+        <h2>
+            <i class="fas fa-wallet"></i> {{ budgetdata.name }}
+        </h2>
+        <p>{{ budgetdata.description }}</p>
+    </div>
+
+    <!-- Key Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h4><i class="fas fa-calendar"></i> Track Period</h4>
+            <div class="stat-value primary">{{ budgetdata.start_date|date:"M d" }} - {{ budgetdata.end_date|date:"M d, Y" }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-coins"></i> Available Amount</h4>
+            <div class="stat-value danger">{{ budgetdata.track_amount }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-bullseye"></i> Budget Amount</h4>
+            <div class="stat-value success">{{ budgetdata.budget_total }}</div>
+            <span class="stat-badge badge-secondary-light">Offset: {{ budgetdata.budget_diff }}</span>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-money-bill-wave"></i> Amount Spent</h4>
+            <div class="stat-value primary">{{ budgetdata.total_spent }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-balance-scale"></i> Remaining Budget</h4>
+            <div class="stat-value success">{{ budgetdata.remaining_budget }}</div>
+            <span class="stat-badge badge-primary-light">+{{ pos_variance }}</span>
+            <span class="stat-badge badge-danger-light">-{{ neg_variance }}</span>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-fire"></i> Burn Rate</h4>
+            <div class="stat-value {% if burn_rate > 100 %}danger{% else %}success{% endif %}">{{ burn_rate }}%</div>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-tasks-alt"></i> Completion</h4>
+            <div class="stat-value primary">{{ budget_completion }}%</div>
+        </div>
+
+        <div class="stat-card">
+            <h4><i class="fas fa-check-circle"></i> Status</h4>
+            <span class="stat-badge {% if budgetdata.budget_status == 'on budget' %}badge-success{% else %}badge-danger{% endif %}">
+                {{ budgetdata.budget_status|upper }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Category Sections with Tables -->
+    {% for group in groupdata %}
+        <div class="category-section">
+            <!-- Category Header -->
+            <div class="category-header">
+                <h3 class="category-title">
+                    <i class="fas fa-folder"></i> {{ group.category }}
+                </h3>
+                <div class="category-badges">
+                    <span class="category-badge">Budget: {{ group.budget_perc }}%</span>
+                    <span class="category-badge">Spent: {% if group.spent_perc > 100 %}<i class="fas fa-exclamation-triangle"></i>{% endif %} {{ group.spent_perc }}%</span>
+                    <span class="category-badge">Amount: {{ group.budget_total }}</span>
+                    <span class="category-badge">Spent: {{ group.spent_total }}</span>
+                    <span class="category-badge">Remaining: {{ group.remaining_total }}</span>
+                </div>
+            </div>
+
+            <!-- Category Table -->
+            <div class="table-wrapper">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col">
+                                <i class="fas fa-bars"></i>
+                            </th>
+                            <th>Item Name</th>
+                            <th>Budget %</th>
+                            <th>Spent %</th>
+                            <th>Budget Amount</th>
+                            <th>Amount Spent</th>
+                            <th>Remaining</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in datalist %}
+                            {% if data.category == group.category %}
+                                <tr>
+                                    <td class="checkbox-col">
+                                        <input type="checkbox" id="{{ data.name }}" />
+                                        <span id="{{ data.name }}_counter" class="row-number">{{ forloop.counter }}</span>
+                                    </td>
+                                    <td>{{ data.name }}</td>
+                                    <td>
+                                        <span class="table-badge badge-primary-light">{{ data.budget_perc }}%</span>
+                                    </td>
+                                    <td>
+                                        <span class="table-badge {% if data.spent_perc > 100 %}badge-danger-light{% else %}badge-success-light{% endif %}">
+                                            {{ data.spent_perc }}%
+                                        </span>
+                                    </td>
+                                    <td>{{ data.amount }}</td>
+                                    <td>{{ data.budget_spent }}</td>
+                                    <td>
+                                        {{ data.remaining_budget }}
+                                        <span class="table-badge badge-secondary-light">[W: {{ data.weighted }}]</span>
+                                    </td>
+                                    <td>
+                                        <span class="table-badge {% if data.budget_status == 'on budget' %}badge-success-light{% else %}badge-danger-light{% endif %}">
+                                            {{ data.budget_status }}
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <!-- Log Rows -->
+                                {% for log in log_data %}
+                                    {% if data.id == log.budgetitem_id %}
+                                        <tr class="{{ data.name }}_log log-row" style="display:none;">
+                                            <td colspan="2" class="text-center">
+                                                <i class="fas fa-receipt"></i> Log Entry
+                                            </td>
+                                            <td class="text-center">{{ log.log_date }}</td>
+                                            <td colspan="2" class="text-center">
+                                                <strong>{{ log.amount }}</strong>
+                                            </td>
+                                            <td colspan="3" class="text-center">
+                                                {{ log.comment }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% empty %}
+        <div class="category-section">
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p><strong>No budget items found</strong></p>
+                <p>Create budget items to get started</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for data in datalist %}
+            const checkbox_{{ forloop.counter }} = document.getElementById("{{ data.name }}");
+            const counter_elem_{{ forloop.counter }} = document.getElementById("{{ data.name }}_counter");
+
+            if (checkbox_{{ forloop.counter }}) {
+                checkbox_{{ forloop.counter }}.addEventListener('click', function(event) {
+                    const rows_class = "{{ data.name }}_log";
+                    const rowElems = document.getElementsByClassName(rows_class);
+
                     for (let i = 0; i < rowElems.length; i++) {
-                      rowElems[i].style.display = "";
+                        rowElems[i].style.display = event.target.checked ? "" : "none";
                     }
+                });
 
-            	}else{
-            	  var check_id = event.target.getAttribute("id");
-            	  var rows_class = check_id+"_log";
-            	  var rowElems = document.getElementsByClassName(rows_class);
-            	  for(var i = 0 ; i < rowElems.length; i++){
-            	      rowElems[i].style.display="none";
-            	  }
-            	}
+                // Check if has logs
+                const logRows = document.getElementsByClassName("{{ data.name }}_log");
+                if (logRows.length > 0) {
+                    counter_elem_{{ forloop.counter }}.classList.add('has-logs');
+                }
             }
-            {% for data in datalist %}
-                document.getElementById("{{data.name}}").addEventListener('click',hideRow);
-                var counter_elem = document.getElementById("{{data.name}}_counter");
-                var class_ids = "{{data.name}}"+ "_log";
-                if(document.getElementsByClassName(class_ids).length > 0){
-                     counter_elem.style.color="green";
-
-                 }
-            {% endfor %}
-      </script>
+        {% endfor %}
+    });
+</script>
 
 {% endblock content %}

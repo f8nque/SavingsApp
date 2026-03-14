@@ -1,0 +1,168 @@
+{% extends "BankingApp/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fas fa-university me-2"></i>Banking Detail - {{ bank.name }}
+    </h2>
+
+    <!-- Bank Info -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Bank Information</h5>
+            <div class="bg-light">
+                <h3 class="font-weight-bold card-title ">{{bank.bank_name}}</h3>
+                <p class="card-text">{{bank.bank_description}}</p>
+            </div>
+
+            <p><strong>Current Balance:</strong> ksh {{ bank.current_balance|floatformat:2 }}</p>
+            <p><strong>Target Amount:</strong>
+                {% if bank.target_amount %}
+                    ksh {{ bank.target_amount|floatformat:2 }}
+                {% else %}
+                    Not set
+                {% endif %}
+            </p>
+            <p><strong>Minimum Amount:</strong>
+                {% if bank.minimum_amount %}
+                    ksh {{ bank.minimum_amount|floatformat:2 }}
+                {% else %}
+                    Not set
+                {% endif %}
+            </p>
+            {% if bank.minimumAlert %}
+            <p class="alert alert-danger card-text"> Bank balance {{bank.current_balance}} is less than the set minimum balance {{bank.minimum_amount}}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Transaction Summary -->
+    <div class="row mt-4">
+        <div class="col-md-2">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Deposits</h6>
+                    <h4>ksh {{ deposit_sum|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Withdrawals</h6>
+                    <h4>ksh {{ withdraw_sum|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Bank Charges</h6>
+                    <h4>ksh {{ charges_sum|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Interests</h6>
+                    <h4>ksh {{ interest_sum|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Loan</h6>
+                    <h4>ksh {{ loan_sum|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Transactions</h6>
+                    <h4>{{ bank.transactions.count }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Progress -->
+    {% if remaining_to_target %}
+    <div class="alert alert-info mt-3" role="alert">
+        <i class="fas fa-target me-2"></i>
+        <strong>Keep going!</strong> You need ksh {{ remaining_to_target|floatformat:2 }} more to reach your target.
+    </div>
+    {% elif bank.target_amount and bank.current_balance >= bank.target_amount %}
+    <div class="alert alert-success mt-3" role="alert">
+        <i class="fas fa-trophy me-2"></i>
+        <strong>Congratulations!</strong> You've reached your target amount!
+        {% if bank.current_balance > bank.target_amount %}
+            You're ksh {{ bank.current_balance}} over your goal.
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Transaction Form -->
+    <div class="card shadow-sm mb-4 mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Add Transaction</h5>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>Add Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Recent Transactions</h5>
+            {% if transactions %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if transaction.transaction_type == "deposit" %}
+                                <span class="badge bg-success">Deposit</span>
+                            {% elif transaction.transaction_type == "withdraw" %}
+                                <span class="badge bg-danger">Withdraw</span>
+                            {% elif transaction.transaction_type == "charges" %}
+                                <span class="badge bg-warning">Bank Charges</span>
+                            {% elif transaction.transaction_type == "loan" %}
+                                <span class="badge bg-danger">Bank Loan</span>
+                            {% elif transaction.transaction_type == "interest" %}
+                                <span class="badge bg-secondary">Interest</span>
+                            {% else %}
+                               <span class="badge bg-secondary">Others</span>
+                            {% endif %}
+                        </td>
+                        <td>ksh {{ transaction.amount|floatformat:2 }}</td>
+                        <td>{{ transaction.description|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No transactions available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,48 +1,177 @@
 {% extends "base.html" %}
 {% block title %}
-Budget  | Class Item List
+Budget | Budget Item List
 {% endblock title %}
 {% block content %}
-<div class="container-fluid px-1 py-5 mx-auto">
-	<div class="text-center">
-            <h3>BUDGET  ITEM LIST</h3>
-            <p class="blue-text">A list of all the budget items.</p>
-				<div class="card m-0 p-0">
-					<div>
-				  <form  action="" method="post">
-					{% csrf_token %}
-					<span class="font-weight-bold text-secondary">Choose a Budget to display</span>
-					<select name="budget" id="budget" class="bg-primary text-white m-3">
-					  {% for budget in budgets %}
-						<option value="{{budget.id}}">{{budget.name}}</option>
-					  {% endfor %}
-					</select>
-					<button type="submit" class="btn btn-outline-primary m-3">filter</button>
-				  </form>
-				  </div>
-				<table class="table table-hover table-boardered ">
-				  <thead>
-					<tr>
-					  <th scope="col">#</th>
-					  <th scope="col">Budget </th>
-                        <th scope="col">Budget Class Item</th>
-						<th scope="col">Amount</th>
-					</tr>
-				  </thead>
-				  <tbody>
-                  {% for data in datalist %}
-					<tr>
-					  <th scope="row">{{forloop.counter}}</th>
-					  <td>{{data.budget}}</td>
-                        <td>{{data.budget_class_item}}</td>
-						<td>{{data.amount}}</td>
-					   <td><a class="badge badge-primary mr-1"  href="{%url 'update_budget_item' data.id%}">update</a></td>
-					   <td><a class="badge badge-danger" href="{% url 'delete_budget_item' data.id %}">delete</a></td>
-					</tr>
-                  {% endfor %}
-				  </tbody>
-				</table>
-				</div> <!-- end card div -->
-            </div> <!-- end format div -->
-      </div> <!-- end container fluid -->
-{% endblock content%}
+<style>
+  .bci-hero{
+    background:linear-gradient(135deg,#3498db,#2980b9);
+    color:#fff;
+    padding:1.25rem;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(41,128,185,0.08);
+    margin-bottom:1rem;
+  }
+  .bci-hero h1{margin:0;font-weight:800;font-size:1.6rem}
+  .bci-hero p{margin:.35rem 0 0;opacity:.95;font-size:.95rem}
+
+  .filter-panel{
+    background:#fff;
+    border-radius:8px;
+    padding:1rem;
+    box-shadow:0 2px 12px rgba(0,0,0,0.04);
+    margin-bottom:1rem;
+  }
+  .filter-panel form{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+  .filter-panel label{
+    font-weight:600;
+    color:#2c3e50;
+    margin:0;
+    font-size:.9rem;
+  }
+  .filter-panel select{
+    padding:.5rem 1rem;
+    border:2px solid #3498db;
+    border-radius:6px;
+    background:#fff;
+    color:#2c3e50;
+    font-weight:600;
+    min-width:200px;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .filter-panel select:focus{
+    outline:none;
+    border-color:#2980b9;
+    box-shadow:0 0 0 3px rgba(52,152,219,0.1);
+  }
+  .filter-panel button{
+    padding:.5rem 1.5rem;
+    background:linear-gradient(90deg,#3498db,#2980b9);
+    border:none;
+    border-radius:6px;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .filter-panel button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(52,152,219,0.3);
+  }
+
+  .table-panel{background:#fff;border-radius:8px;padding:.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+  table.table-sm{margin-bottom:0;font-size:.92rem}
+  table.table-sm thead th{background:linear-gradient(90deg,#3498db,#2980b9);color:#fff;font-weight:700;font-size:.8rem;padding:.5rem .6rem}
+  table.table-sm td, table.table-sm th{padding:.45rem .6rem;vertical-align:middle}
+  
+  .actions{display:flex;gap:.3rem;justify-content:center;flex-wrap:wrap}
+  .actions a{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .5rem;border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.8rem;transition:all .2s}
+  .actions .badge-update{background:#3498db}
+  .actions .badge-update:hover{background:#2980b9;transform:translateY(-1px);box-shadow:0 3px 8px rgba(52,152,219,0.2)}
+  .actions .badge-delete{background:#e74c3c}
+  .actions .badge-delete:hover{background:#c0392b;transform:translateY(-1px);box-shadow:0 3px 8px rgba(231,76,60,0.2)}
+
+  .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+  .stats{font-size:.85rem;color:#6b7280}
+  .empty-state{text-align:center;padding:2rem;color:#7f8c8d}
+  .empty-state i{font-size:2.5rem;color:#bdc3c7;display:block;margin-bottom:.5rem}
+
+  @media(max-width:576px){
+    .bci-hero h1{font-size:1.25rem}
+    .controls{flex-direction:column;align-items:stretch}
+    .actions{justify-content:flex-start}
+    .filter-panel form{flex-direction:column;align-items:stretch}
+    .filter-panel select{min-width:100%}
+  }
+</style>
+
+<div class="bci-hero">
+  <h1><i class="fas fa-wallet" aria-hidden="true"></i> Budget Items</h1>
+  <p>Manage and track all budget items across different budgets</p>
+</div>
+
+<div class="filter-panel">
+  <form action="" method="post">
+    {% csrf_token %}
+    <label for="budget">
+      <i class="fas fa-filter" aria-hidden="true"></i> Choose a Budget:
+    </label>
+    <select name="budget" id="budget">
+      {% for budget in budgets %}
+        <option value="{{budget.id}}">{{budget.name}}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">
+      <i class="fas fa-search" aria-hidden="true"></i> Filter
+    </button>
+  </form>
+</div>
+
+<div class="table-panel">
+  <div class="controls">
+    <div class="stats">
+      Total Items: <strong>{{ datalist|length }}</strong>
+    </div>
+    <a href="{% url 'add_budget_item' %}" class="btn btn-sm btn-primary" style="border-radius:6px;">
+      <i class="fas fa-plus" aria-hidden="true"></i>&nbsp;New Budget Item
+    </a>
+  </div>
+
+  {% if datalist %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th style="width:3%">#</th>
+            <th>Budget</th>
+            <th>Budget Class Item</th>
+            <th>Amount</th>
+            <th style="width:20%" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in datalist %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <strong>{{ data.budget }}</strong>
+              </td>
+              <td>
+                <span class="badge badge-pill" style="background:#2980b9;color:#fff">{{ data.budget_class_item }}</span>
+              </td>
+              <td>
+                <strong style="color:#27ae60">{{ data.amount }}</strong>
+              </td>
+              <td>
+                <div class="actions">
+                  <a class="badge-update" href="{% url 'update_budget_item' data.id %}" title="Edit item">
+                    <i class="fas fa-edit" aria-hidden="true"></i> Edit
+                  </a>
+                  <a class="badge-delete" href="{% url 'delete_budget_item' data.id %}" title="Delete item" onclick="return confirm('Are you sure you want to delete this budget item?');">
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-inbox" aria-hidden="true"></i>
+      <p><strong>No budget items found</strong></p>
+      <p class="small">Create a budget item or select a different budget to view items.</p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock content %}

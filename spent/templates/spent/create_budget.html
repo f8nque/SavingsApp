@@ -1,46 +1,105 @@
 {% extends "base.html" %}
-{% block title %} Category | CategoryRegistration {%endblock title %}
+{% block title %} Budget | Create {% endblock title %}
+{% block content %}
 
-{%block content %}
-<h1 class="text-center text-primary font-weight-bold">BUDGET PAGE</h1>
-<hr/>
-<div class="container-fluid px-1 py-5 mx-auto">
-    <div class="row d-flex justify-content-center">
-        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
-            <h3>CREATE BUDGET FORM</h3>
-            <p class="blue-text">Adds a new Budget Item in your monthly budget<br> for easier tracking of various budget item.</p>
-            <div class="card m-0 p-0">
-                <h5 class="text-center mb-4">Budget Form</h5>
-                <form class="form-card" action="" method="post">
-                    {% csrf_token %}
-                	<div class="justify-content-between text-left">
-                        <div class="form-group flex-column d-flex">
-                        	<label class="form-control-label px-3">
-                        		Budget Tracks<span class="text-danger"> *</span>
-                        	</label>
-                            {{form.track_id}}
-                        </div>
-                    <div class="justify-content-between text-left">
-                        <div class="form-group flex-column d-flex">
-                        	<label class="form-control-label px-3" for="{{form.name.id_for_label}}">
-                        		Name<span class="text-danger"> *</span>
-                        	</label>
-                        	{{form.name}} </div>
-                     <div class="form-group flex-column d-flex">
-                        <label class="form-control-label px-3" for="{{form.description.id_for_label}}">
-                        Budget Description
-                        <span class="text-danger"> *</span></label>
-                          {{form.description}}
-                        </div>
-                    </div>
+<style>
+  .create-hero{
+    background:linear-gradient(135deg,#3498db,#2980b9);
+    color:#fff;
+    padding:1.25rem;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 6px 18px rgba(41,128,185,0.08);
+    margin-bottom:1rem;
+  }
+  .create-hero h1{margin:0;font-size:1.6rem;font-weight:700}
+  .create-hero p{margin:.4rem 0 0;font-size:.95rem;opacity:.95}
 
+  .form-card{
+    background:#fff;border-radius:8px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.04);
+    max-width:760px;margin:0 auto;
+  }
 
-                    <div class=" justify-content-end">
-                        <div class="form-group"> <button type="submit" class="btn-block btn-primary">Create Budget</button> </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+  .form-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem}
+  .form-group{flex:1;min-width:220px;display:flex;flex-direction:column}
+  label.form-label{font-weight:600;color:#2c3e50;margin-bottom:.35rem;font-size:.9rem}
+  .help-text{font-size:.82rem;color:#6b7280;margin-top:.35rem}
+
+  input.form-control, select.form-control, textarea.form-control{
+    border:1px solid #e9eef5;border-radius:6px;padding:.6rem .75rem;font-size:.95rem;
+    transition:box-shadow .15s, border-color .15s;
+  }
+  input.form-control:focus, select.form-control:focus, textarea.form-control:focus{
+    outline:none;border-color:#3498db;box-shadow:0 6px 18px rgba(52,152,219,0.08);
+  }
+
+  .btn-row{display:flex;gap:.5rem;align-items:center;margin-top:.75rem}
+  .btn-primary{background:#3498db;border:none;color:#fff;padding:.6rem 1rem;border-radius:6px;font-weight:600}
+  .btn-secondary{background:transparent;border:1px solid #d1d8e0;color:#34495e;padding:.55rem .9rem;border-radius:6px}
+
+  .field-errors{margin-bottom:.5rem}
+  .field-errors .alert{margin:0;padding:.45rem .6rem;font-size:.9rem}
+
+  @media(max-width:576px){
+    .form-row{flex-direction:column}
+    .btn-row{flex-direction:column}
+    .btn-row .btn-primary, .btn-row .btn-secondary{width:100%}
+  }
+</style>
+
+<div class="create-hero">
+  <h1><i class="fas fa-wallet"></i> Create Budget</h1>
+  <p>Add a budget item to track spending and allocations.</p>
 </div>
+
+<div class="form-card" role="region" aria-label="Create budget form">
+  <h3 class="mb-2" style="margin-top:0">Budget Form</h3>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="field-errors">
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      </div>
+    {% endif %}
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="{{ form.track_id.id_for_label }}">Budget Track <span style="color:#e74c3c">*</span></label>
+        {{ form.track_id }}
+        {% if form.track_id.errors %}<div class="field-errors"><div class="alert alert-danger">{{ form.track_id.errors }}</div></div>{% endif %}
+        <div class="help-text">Select the track/group this budget belongs to.</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="{{ form.name.id_for_label }}">Name <span style="color:#e74c3c">*</span></label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="field-errors"><div class="alert alert-danger">{{ form.name.errors }}</div></div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description}}
+        {% if form.description.errors %}<div class="field-errors"><div class="alert alert-danger">{{ form.description.errors }}</div></div>{% endif %}
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button type="submit" class="btn-primary"><i class="fas fa-check-circle"></i>&nbsp;Create Budget</button>
+      <a href="{% url 'budget_list' %}" class="btn-secondary"><i class="fas fa-arrow-left"></i>&nbsp;Cancel</a>
+      <div style="margin-left:auto;color:#6b7280;font-size:.85rem">Required fields marked with <span style="color:#e74c3c">*</span></div>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const el = document.querySelector('form .form-control');
+    if(el) el.focus();
+  });
+</script>
+
 {% endblock content %}

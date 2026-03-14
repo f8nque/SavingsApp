@@ -1,50 +1,477 @@
 {% extends "base.html" %}
-{% block title %}
-Budget  | Budget List
-{% endblock title %}
+{% block title %}Budget | Budget List{% endblock title %}
 {% block content %}
-<div class="container-fluid px-1 py-5 mx-auto">
-	<div class="text-center">
-            <h3>BUDGET LIST</h3>
-            <p class="blue-text">A list of all the budget  <br> with summary.</p>
-				<div class="card m-0 p-0">
-				<table class="table table-hover table-boardered ">
-				  <thead>
-					<tr>
-					  <th scope="col">#</th>
-					  <th scope="col">Budget Name</th>
-                        <th scope="col">Budget Description</th>
-					  <th scope="col">Budget Amount</th>
-					  <th scope="col">Amount Spend</th>
-					  <th scope="col">Remaining Budget</th>
-					  <th scope="col">Budget Status</th>
-					</tr>
-				  </thead>
-				  <tbody>
-                  {% for data in datalist %}
-					<tr>
-					  <th scope="row">{{forloop.counter}}</th>
-					  <td>{{data.name}}</td>
-                        <td>{{data.description}}</td>
-					  <td>{{data.budget_total}}</td>
-					  <td>{{data.total_spent}}|
-						  <span
-							{%if data.burn_rate > 100 %} then class="h3 badge badge-danger" {% else %} class="h3 badge badge-success" {%endif %} >
-							  ({{data.burn_rate}}%)
-						  </span>
 
-					  </td>
-					  <td>{{data.remaining_budget}}</td>
-					  <td  {%if data.budget_status == "on budget" %} then class="h3 badge badge-primary" {% else %} class="h3 badge badge-danger" {%endif %}>
-                        {{data.budget_status}}</td>
-					  <td><a class="badge badge-success mr-1"  href="{%url 'budget_view' data.id%}">View</a></td>
-					   <td><a class="badge badge-primary mr-1"  href="{%url 'update_budget' data.id%}">update</a></td>
-					   <td><a class="badge badge-danger" href="{% url 'delete_budget' data.id %}">delete</a></td>
-					</tr>
-                  {% endfor %}
-				  </tbody>
-				</table>
-				</div> <!-- end card div -->
-            </div> <!-- end format div -->
-      </div> <!-- end container fluid -->
-{% endblock content%}
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    /* Stats Card */
+    .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stats-icon {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stats-content h3 {
+        margin: 0 0 0.2rem 0;
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+    }
+
+    .stats-content p {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #3498db;
+    }
+
+    /* Table Container */
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Bootstrap Table Overrides for table-sm */
+    .table-sm {
+        margin-bottom: 0;
+    }
+
+    .table-sm thead th {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.4px;
+        border: none;
+        padding: 0.8rem;
+        vertical-align: middle;
+    }
+
+    .table-sm tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table-sm tbody tr:hover {
+        background-color: #f8f9fa;
+        box-shadow: inset 0 0 5px rgba(52, 152, 219, 0.1);
+    }
+
+    .table-sm tbody td {
+        color: #2c3e50;
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .table-sm tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Column Styling */
+    .col-no {
+        font-weight: 600;
+        color: #3498db;
+        width: 40px;
+        text-align: center;
+    }
+
+    .col-name {
+        font-weight: 600;
+        width: 12%;
+    }
+
+    .col-amount {
+        text-align: right;
+        width: 10%;
+        padding-right: 1rem;
+    }
+
+    .col-status {
+        width: 10%;
+    }
+
+    .col-actions {
+        width: 18%;
+    }
+
+    /* Badge Styling */
+    .badge-action {
+        padding: 0.35rem 0.7rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-success {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .badge-success:hover {
+        background-color: #229954;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(39, 174, 96, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .badge-primary {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .badge-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(52, 152, 219, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .badge-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .badge-danger:hover {
+        background-color: #c0392b;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(231, 76, 60, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .badge-warning {
+        background-color: #f39c12;
+        color: white;
+    }
+
+    .badge-warning:hover {
+        background-color: #d68910;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(243, 156, 18, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+
+    /* Burn Rate */
+    .burn-rate-text {
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+
+    /* Action Cell */
+    .action-cell {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #bdc3c7;
+        margin-bottom: 0.8rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0.3rem 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .table-sm thead th {
+            padding: 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        .table-sm tbody td {
+            padding: 0.5rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .action-cell {
+            gap: 0.2rem;
+        }
+
+        .badge-action {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+        }
+
+        .stats-card {
+            padding: 1rem;
+        }
+
+        .stats-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+        }
+
+        .stats-content p {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.2rem;
+            gap: 0.5rem;
+        }
+
+        .page-header h1 i {
+            font-size: 1.5rem;
+        }
+
+        .page-header p {
+            font-size: 0.8rem;
+        }
+
+        .table-sm thead th {
+            padding: 0.5rem;
+            font-size: 0.65rem;
+        }
+
+        .table-sm tbody td {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .col-no {
+            width: 35px;
+            font-size: 0.8rem;
+        }
+
+        .action-cell {
+            gap: 0.2rem;
+            flex-direction: column;
+        }
+
+        .badge-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.6rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stats-card {
+            padding: 0.9rem;
+            gap: 0.8rem;
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .stats-content p {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .page-header h1 {
+            font-size: 1rem;
+            gap: 0.3rem;
+        }
+
+        .table-sm thead th {
+            padding: 0.4rem;
+            font-size: 0.6rem;
+        }
+
+        .table-sm tbody td {
+            padding: 0.35rem 0.4rem;
+            font-size: 0.7rem;
+        }
+
+        .badge-action {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.55rem;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1>
+        <i class="fas fa-wallet"></i> Budget List
+    </h1>
+    <p>View and manage all your budgets with detailed summary</p>
+</div>
+
+<!-- Stats Card -->
+<div class="stats-card">
+    <div class="stats-icon">
+        <i class="fas fa-chart-pie"></i>
+    </div>
+    <div class="stats-content">
+        <h3>Total Budgets</h3>
+        <p>{{ datalist|length }}</p>
+    </div>
+</div>
+
+<!-- Table Container -->
+<div class="table-container">
+    {% if datalist %}
+        <div class="table-wrapper">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th class="col-no">#</th>
+                        <th class="col-name">Budget Name</th>
+                        <th>Description</th>
+                        <th class="col-amount">Budget Amount</th>
+                        <th class="col-amount">Amount Spent</th>
+                        <th class="col-amount">Remaining</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in datalist %}
+                        <tr>
+                            <td class="col-no">{{ forloop.counter }}</td>
+                            <td class="col-name">{{ data.name }}</td>
+                            <td>{{ data.description|truncatewords:3 }}</td>
+                            <td class="col-amount">{{ data.budget_total }}</td>
+                            <td class="col-amount">
+                                {{ data.total_spent }}
+                                <span class="burn-rate-text {% if data.burn_rate > 100 %}text-danger{% else %}text-success{% endif %}">
+                                    ({{ data.burn_rate }}%)
+                                </span>
+                            </td>
+                            <td class="col-amount">{{ data.remaining_budget }}</td>
+                            <td class="col-status">
+                                <span class="status-badge {% if data.budget_status == 'on budget' %}badge-primary{% else %}badge-danger{% endif %}">
+                                    {{ data.budget_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-cell">
+                                    <a class="badge-action badge-success" href="{% url 'budget_view' data.id %}" title="View Budget">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a class="badge-action badge-primary" href="{% url 'update_budget' data.id %}" title="Edit Budget">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a class="badge-action badge-danger" href="{% url 'delete_budget' data.id %}" title="Delete Budget">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p><strong>No budgets found</strong></p>
+            <p>Create your first budget to get started</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock content %}

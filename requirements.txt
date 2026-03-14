@@ -2,3 +2,4 @@ pandas
 django-admin
 django-crispy-forms
 django-pandas
+django-widget-tweaks

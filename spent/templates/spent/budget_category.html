@@ -1,59 +1,84 @@
 {% extends "base.html" %}
 {% block title %} Budget | Create Budget Category {%endblock title %}
 
-{%block content %}
-<h1 class="text-center text-primary font-weight-bold">CATEGORY PAGE</h1>
-<hr/>
-{% load crispy_forms_tags %}
-<div class="container-fluid px-1 py-5 mx-auto">
-    <div class="row d-flex justify-content-center">
-        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
-            <h3>BUDGET CATEGORY FORM</h3>
-            <p class="blue-text">Adds a new Budget Category <br> for a broad grouping of budget items.</p>
-            <div class="card m-0 p-0">
-                {% if error %}
-                    <div class="alert alert-danger">
-                        {{error }}
-                    </div>
-                {% endif %}
-                <h5 class="text-center mb-4">Budget Category</h5>
-                <form class="form-card" action="" method="post">
-                {% csrf_token%}
-                <div class="justify-content-between text-left">
-                        <div class="form-group  flex-column d-flex">
-                        	<label class="form-control-label px-3">
-                        		Budget Category Name<span class="text-danger"> *</span>
-                        	</label>
-                            {{form.name}}
-                        </div>
-                    </div>
-                    <div class=" justify-content-between text-left">
-                    <div class="form-group  flex-column d-flex">
-                        	<label class="form-control-label px-3" for="{{form.priority.id_for_label}}">
-                        		Category Priority<span class="text-danger"> *</span>
-                        	</label>
-                        	<select class="form-group form-control" name="{{form.priority.html_name}}" id="{{form.priority.id_for_label}}">
-                         	<option value="1">Priority 1</option>
-                         	<option value="2">Priority 2</option>
-                         	<option value="3">Priority 3</option>
-                         	<option value="4">Priority 4</option>
-                         	<option value="5">Priority 5</option>
-                         	<option value="6">Priority 6</option>
-                         	<option value="7">Priority 7</option>
-                         	<option value="8">Priority 8</option>
-                         	<option value="9">Priority 9</option>
-                         	<option value="10">Priority 10</option>
-                         </select>
-                        </div>
-                    <div class="justify-content-around">
-                        <div class="form-group"> <button type="submit" class="btn-block btn-primary">Create A Budget Category</button> </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{% block content %}
+<style>
+  .bc-hero{
+    background:linear-gradient(135deg,#3498db,#2980b9);
+    color:#fff;padding:1.25rem;border-radius:8px;margin-bottom:1rem;text-align:center;
+    box-shadow:0 8px 24px rgba(41,128,185,0.08)
+  }
+  .bc-card{max-width:760px;margin:0 auto;background:#fff;border-radius:8px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+  .form-label{font-weight:700;color:#2c3e50;font-size:.95rem;margin-bottom:.35rem;display:block}
+  .help-text{font-size:.85rem;color:#6b7280;margin-top:.35rem}
+  .btn-primary{background:#3498db;border:none;padding:.6rem 1rem;border-radius:6px}
+  .field-errors .alert{margin:0;padding:.5rem;font-size:.92rem}
+  @media(max-width:576px){.bc-card{padding:.9rem}}
+</style>
+
+<div class="bc-hero" role="banner" aria-label="Create budget category">
+  <h1 class="h4 mb-0"><i class="fas fa-layer-group" aria-hidden="true"></i> Create Budget Category</h1>
+  <div class="small mt-1">Add a category to group related budget items</div>
 </div>
 
+<div class="bc-card" role="main" aria-labelledby="bc-title">
+  <h2 id="bc-title" class="h5 mb-3">Budget Category Form</h2>
 
+  {% if error %}
+    <div class="field-errors mb-2">
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    </div>
+  {% endif %}
 
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.name.id_for_label }}">Category Name <span style="color:#e74c3c">*</span></label>
+      {{ form.name }}
+      {% if form.name.errors %}
+        <div class="field-errors"><div class="alert alert-danger">{{ form.name.errors|striptags }}</div></div>
+      {% endif %}
+      <div class="help-text">Give a short, descriptive name for the category (e.g., Groceries, Utilities).</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.priority.id_for_label }}">Priority <span style="color:#e74c3c">*</span></label>
+      <select class="form-control" name="{{ form.priority.html_name }}" id="{{ form.priority.id_for_label }}">
+        <option value="">Select priority</option>
+        <option value="1" {% if form.priority.value|stringformat:"s" == "1" %}selected{% endif %}>Priority 1</option>
+        <option value="2" {% if form.priority.value|stringformat:"s" == "2" %}selected{% endif %}>Priority 2</option>
+        <option value="3" {% if form.priority.value|stringformat:"s" == "3" %}selected{% endif %}>Priority 3</option>
+        <option value="4" {% if form.priority.value|stringformat:"s" == "4" %}selected{% endif %}>Priority 4</option>
+        <option value="5" {% if form.priority.value|stringformat:"s" == "5" %}selected{% endif %}>Priority 5</option>
+        <option value="6" {% if form.priority.value|stringformat:"s" == "6" %}selected{% endif %}>Priority 6</option>
+        <option value="7" {% if form.priority.value|stringformat:"s" == "7" %}selected{% endif %}>Priority 7</option>
+        <option value="8" {% if form.priority.value|stringformat:"s" == "8" %}selected{% endif %}>Priority 8</option>
+        <option value="9" {% if form.priority.value|stringformat:"s" == "9" %}selected{% endif %}>Priority 9</option>
+        <option value="10" {% if form.priority.value|stringformat:"s" == "10" %}selected{% endif %}>Priority 10</option>
+      </select>
+      {% if form.priority.errors %}
+        <div class="field-errors"><div class="alert alert-danger">{{ form.priority.errors|striptags }}</div></div>
+      {% endif %}
+      <div class="help-text">Lower number = higher priority. Used for ordering and focus.</div>
+    </div>
+
+    <div class="d-flex" style="gap:.5rem;align-items:center;margin-top:.75rem">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>&nbsp;Create Category
+      </button>
+      <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary" style="border-radius:6px;padding:.45rem .8rem;">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>&nbsp;Cancel
+      </a>
+      <div style="margin-left:auto;color:#6b7280;font-size:.85rem">Fields marked <span style="color:#e74c3c">*</span> are required</div>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded',function(){
+    const name = document.getElementById("{{ form.name.id_for_label }}");
+    if(name) name.focus();
+  });
+</script>
 {% endblock content %}
